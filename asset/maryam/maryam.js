@@ -1,0 +1,262 @@
+// Nama Fail: maryam/maryam.js
+document.addEventListener('DOMContentLoaded', function() {
+    (function() {
+        // --- Konfigurasi Utama ---
+        const surahNumber = 19;
+        const surahName = "Maryam";
+        const totalAyahs = 98;
+        const storyChapters = {
+            'Doa Nabi Zakariyya (a.s.)': 0,      // Ayat 1-15
+            'Kisah Maryam & Isa (a.s.)': 15,     // Ayat 16-40
+            'Dakwah Nabi Ibrahim (a.s.)': 40,    // Ayat 41-50
+            'Para Nabi Pilihan': 50,             // Ayat 51-58
+            'Generasi Pengganti': 58,            // Ayat 59-65
+            'Hari Kebangkitan': 65,              // Ayat 66-98
+        };
+
+        // --- Pemilih Elemen DOM ---
+        const container = document.getElementById('surah-maryam-tool-container');
+        if (!container) return;
+
+        const ayahListContainer = container.querySelector('#ilmu-smy-ayah-list');
+        const audioPlayer = container.querySelector('#ilmu-smy-audio-player');
+        const playPauseAllBtn = container.querySelector('#ilmu-smy-play-pause-all');
+        const autoplayToggle = container.querySelector('#ilmu-smy-autoplay-toggle');
+        const loadingIndicator = container.querySelector('#ilmu-smy-loading');
+        const controlsContainer = container.querySelector('.ilmu-smy-controls');
+        const notification = container.querySelector('#ilmu-smy-copy-notification');
+        const goToAyahSelect = container.querySelector('#ilmu-smy-goto-ayah');
+        const goToStorySelect = container.querySelector('#ilmu-smy-goto-story');
+        const progressBar = container.querySelector('.ilmu-smy-progress-bar');
+
+        // --- Pembolehubah Keadaan ---
+        const surahData = [];
+        let currentAyahIndex = -1;
+        let isPlaying = false;
+        let bookmarkedAyahs = new Set(JSON.parse(localStorage.getItem(`bookmarked_${surahNumber}`)) || []);
+
+        // --- Fungsi Teras ---
+        async function fetchSurahData() {
+            try {
+                const response = await fetch(`https://api.alquran.cloud/v1/surah/${surahNumber}/editions/ar.alafasy,ms.basmeih,en.transliteration`);
+                if (!response.ok) throw new Error('Respons rangkaian tidak baik');
+                const data = await response.json();
+
+                if (loadingIndicator) loadingIndicator.style.display = 'none';
+                if (controlsContainer) controlsContainer.style.display = 'flex';
+
+                const [arabicAyahs, malayAyahs, rumiAyahs] = [data.data[0].ayahs, data.data[1].ayahs, data.data[2].ayahs];
+                for (let i = 0; i < totalAyahs; i++) {
+                    surahData.push({
+                        number: arabicAyahs[i].numberInSurah,
+                        arabic: arabicAyahs[i].text,
+                        translation: malayAyahs[i].text,
+                        transliteration: rumiAyahs[i].text,
+                        audio: arabicAyahs[i].audio
+                    });
+                }
+                setupPlaceholders();
+                initLazyLoader();
+                populateNavigators();
+            } catch (error) {
+                if (loadingIndicator) loadingIndicator.innerHTML = `<p style="color:red;">Maaf, gagal memuatkan data Surah ${surahName}.</p>`;
+                console.error(`Error fetching Surah ${surahName} data:`, error);
+            }
+        }
+
+        function populateNavigators() {
+            if (goToAyahSelect) {
+                for (let i = 1; i <= totalAyahs; i++) {
+                    const option = document.createElement('option');
+                    option.value = i - 1;
+                    option.textContent = `Ayat ${i}`;
+                    goToAyahSelect.appendChild(option);
+                }
+            }
+            if (goToStorySelect) {
+                for (const storyName in storyChapters) {
+                    const option = document.createElement('option');
+                    option.value = storyChapters[storyName];
+                    option.textContent = storyName;
+                    goToStorySelect.appendChild(option);
+                }
+            }
+        }
+        
+        // --- Logik Pemuatan Malas (Lazy Loading) ---
+        function setupPlaceholders() {
+            if (!ayahListContainer) return;
+            const fragment = document.createDocumentFragment();
+            for (let i = 0; i < totalAyahs; i++) {
+                const placeholder = document.createElement('div');
+                placeholder.className = 'ilmu-smy-ayah-placeholder';
+                placeholder.dataset.index = i;
+                placeholder.id = `ilmu-smy-ayah-${i}`;
+                fragment.appendChild(placeholder);
+            }
+            ayahListContainer.appendChild(fragment);
+        }
+
+        function initLazyLoader() {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const placeholder = entry.target;
+                        const index = parseInt(placeholder.dataset.index);
+                        if (!placeholder.classList.contains('ilmu-smy-loaded')) {
+                            const ayahData = surahData[index];
+                            if(ayahData) {
+                                placeholder.innerHTML = renderAyahContent(ayahData, index);
+                                placeholder.className = 'ilmu-smy-ayah ilmu-smy-loaded';
+                                if (bookmarkedAyahs.has(index)) {
+                                    placeholder.classList.add('ilmu-smy-bookmarked');
+                                }
+                            }
+                        }
+                    }
+                });
+            }, { rootMargin: '400px 0px' });
+
+            document.querySelectorAll('.ilmu-smy-ayah-placeholder').forEach(ph => observer.observe(ph));
+        }
+
+        function renderAyahContent(ayah, index) {
+            const isBookmarked = bookmarkedAyahs.has(index);
+            const bookmarkIcon = isBookmarked
+                ? `<svg fill="#ffc107" viewBox="0 0 24 24"><path d="M17 3H7c-1.1 0-2 .9-2 2v16l7-3 7 3V5c0-1.1-.9-2-2-2z"></path></svg>`
+                : `<svg fill="currentColor" viewBox="0 0 24 24"><path d="M17 3H7c-1.1 0-2 .9-2 2v16l7-3 7 3V5c0-1.1-.9-2-2-2zm0 15l-5-2.18L7 18V5h10v13z"></path></svg>`;
+            return `
+                <div class="ilmu-smy-ayah-header">
+                    <span class="ilmu-smy-ayah-number">${surahName} : Ayat ${ayah.number}</span>
+                    <button class="ilmu-smy-action-button" data-action="play" data-index="${index}" aria-label="Mainkan Ayat ${ayah.number}">
+                         <svg fill="#249749" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"></path></svg>
+                    </button>
+                </div>
+                <p class="ilmu-smy-arabic">${ayah.arabic}</p>
+                <p class="ilmu-smy-rumi">${ayah.transliteration}</p>
+                <p class="ilmu-smy-translation">${ayah.translation}</p>
+                <div class="ilmu-smy-ayah-actions">
+                     <button class="ilmu-smy-action-button" data-action="copy" data-index="${index}">
+                        <svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"></path></svg>Copy
+                    </button>
+                    <button class="ilmu-smy-action-button" data-action="share" data-index="${index}">
+                       <svg viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 8.11C7.5 7.61 6.79 7.3 6 7.3c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.66 1.34 3 3 3s3-1.34 3-3-1.34-3-3-3z"></path></svg>Share
+                    </button>
+                     <button class="ilmu-smy-action-button" data-action="bookmark" data-index="${index}">
+                        ${bookmarkIcon} ${isBookmarked ? 'Bookmarked' : 'Bookmark'}
+                    </button>
+                </div>`;
+        }
+        
+        // --- Fungsi Kawalan & Interaksi ---
+        function handleAction(e) {
+            const target = e.target.closest('.ilmu-smy-action-button');
+            if (!target) return;
+            const action = target.dataset.action;
+            const index = parseInt(target.dataset.index);
+            const ayahData = surahData[index];
+            const textToCopy = `Surah ${surahName}, Ayat ${ayahData.number}:\n\n${ayahData.arabic}\n\nTerjemahan: "${ayahData.translation}"\n\n- Dari ilmualam.com`;
+
+            if (action === 'play') playAyah(index);
+            if (action === 'copy') copyToClipboard(textToCopy);
+            if (action === 'share') shareAyah(textToCopy);
+            if (action === 'bookmark') toggleBookmark(index, target);
+        }
+
+        function playAyah(index) {
+            if (index >= totalAyahs || index < 0) return stopPlayback();
+            currentAyahIndex = index;
+            audioPlayer.src = surahData[index].audio;
+            audioPlayer.play().catch(e => console.error("Audio error:", e));
+            isPlaying = true;
+            updateUIForPlayback();
+        }
+
+        function stopPlayback() {
+            audioPlayer.pause();
+            audioPlayer.currentTime = 0;
+            isPlaying = false;
+            currentAyahIndex = -1;
+            updateUIForPlayback();
+        }
+
+        function updateUIForPlayback() {
+            playPauseAllBtn.textContent = isPlaying ? 'Stop Reading' : 'Start Reading';
+            document.querySelectorAll('.ilmu-smy-ayah.ilmu-smy-loaded').forEach((div) => {
+                const index = parseInt(div.dataset.index);
+                const playBtnIcon = div.querySelector('[data-action="play"] svg path');
+                if (index === currentAyahIndex && isPlaying) {
+                    div.classList.add('ilmu-smy-playing');
+                    if (playBtnIcon) playBtnIcon.setAttribute('d', 'M6 19h4V5H6v14zm8-14v14h4V5h-4z');
+                } else {
+                    div.classList.remove('ilmu-smy-playing');
+                    if (playBtnIcon) playBtnIcon.setAttribute('d', 'M8 5v14l11-7z');
+                }
+            });
+            
+            if (isPlaying) {
+                const targetAyah = document.getElementById(`ilmu-smy-ayah-${currentAyahIndex}`);
+                if (targetAyah) targetAyah.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                if (goToAyahSelect) goToAyahSelect.value = currentAyahIndex;
+            }
+        }
+        
+        function updateProgressBar() {
+            if (!progressBar) return;
+            const scrollTop = ayahListContainer.scrollTop;
+            const scrollHeight = ayahListContainer.scrollHeight - ayahListContainer.clientHeight;
+            const progress = (scrollTop / scrollHeight) * 100;
+            progressBar.style.width = `${progress}%`;
+        }
+
+        function copyToClipboard(text) { navigator.clipboard.writeText(text).then(() => showNotification("Text copied successfully!")); }
+        async function shareAyah(text) {
+            if (navigator.share) {
+                try { await navigator.share({ title: `Ayat from Surah ${surahName}`, text: text, url: window.location.href }); } catch(err) { console.error('Share failed:', err); }
+            } else { copyToClipboard(text); }
+        }
+        function toggleBookmark(index, button) {
+            const ayahDiv = document.getElementById(`ilmu-smy-ayah-${index}`);
+            if (bookmarkedAyahs.has(index)) {
+                bookmarkedAyahs.delete(index);
+                ayahDiv.classList.remove('ilmu-smy-bookmarked');
+                button.innerHTML = `<svg fill="currentColor" viewBox="0 0 24 24"><path d="M17 3H7c-1.1 0-2 .9-2 2v16l7-3 7 3V5c0-1.1-.9-2-2-2zm0 15l-5-2.18L7 18V5h10v13z"></path></svg> Bookmark`;
+            } else {
+                bookmarkedAyahs.add(index);
+                ayahDiv.classList.add('ilmu-smy-bookmarked');
+                button.innerHTML = `<svg fill="#ffc107" viewBox="0 0 24 24"><path d="M17 3H7c-1.1 0-2 .9-2 2v16l7-3 7 3V5c0-1.1-.9-2-2-2z"></path></svg> Bookmarked`;
+            }
+            localStorage.setItem(`bookmarked_${surahNumber}`, JSON.stringify([...bookmarkedAyahs]));
+        }
+        function showNotification(message) {
+            if (!notification) return;
+            notification.textContent = message;
+            notification.style.opacity = 1;
+            setTimeout(() => { notification.style.opacity = 0; }, 2000);
+        }
+
+        // --- Pendengar Acara (Event Listeners) ---
+        function addEventListeners() {
+            ayahListContainer.addEventListener('click', handleAction);
+            ayahListContainer.addEventListener('scroll', updateProgressBar);
+            playPauseAllBtn.addEventListener('click', () => isPlaying ? stopPlayback() : playAyah(0));
+            audioPlayer.addEventListener('ended', () => {
+                if (autoplayToggle.checked && currentAyahIndex < totalAyahs - 1) playAyah(currentAyahIndex + 1);
+                else stopPlayback();
+            });
+            const jumpToAction = (e) => {
+                const ayahIndex = parseInt(e.target.value);
+                const targetAyah = document.getElementById(`ilmu-smy-ayah-${ayahIndex}`);
+                if (targetAyah) {
+                    ayahListContainer.scrollTop = targetAyah.offsetTop - ayahListContainer.offsetTop;
+                }
+            };
+            goToAyahSelect.addEventListener('change', jumpToAction);
+            goToStorySelect.addEventListener('change', jumpToAction);
+        }
+
+        // --- Mulakan Alat ---
+        fetchSurahData();
+        addEventListeners();
+    })();
+});
