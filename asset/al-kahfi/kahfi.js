@@ -1,4 +1,8 @@
-
+ /* IlmuAlam Surah Al-Kahfi - https://ilmualam.com
+ * - Vanilla JS, lightweight
+ * - Via Audio & Full Surah from Aladhan
+ * - LocalStorage cache (kurang hit API)
+ */
 document.addEventListener('DOMContentLoaded', () => {
     const app = document.getElementById('ilmu-kahf-app');
     if (!app) return;
@@ -8,7 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
         surahData: null,
         isLoading: true,
         error: null,
-        currentVerseKey: null, // e.g., 'verse-1'
+        currentVerseKey: null,
         isPlaying: false,
         isAutoScroll: true,
         displayOptions: {
@@ -26,7 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
         mainContent: app.querySelector('#ilmu-kahf-main'),
         playerContainer: app.querySelector('#ilmu-kahf-player-container'),
         surahName: app.querySelector('#ilmu-kahf-surah-name'),
-        surahEnglishName: app.querySelector('#ilmu-kahf-surah-english-name'),
+        surahEnglishName: app.querySelector('#ilmu-kahf-english-name'),
         storyNavigator: app.querySelector('#ilmu-kahf-story-nav'),
         playPauseBtn: app.querySelector('#ilmu-kahf-play-pause-btn'),
         playIcon: app.querySelector('#ilmu-kahf-play-icon'),
@@ -58,7 +62,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const data = json.data;
 
         if (data.length < 3) throw new Error('Could not fetch all required editions.');
-        
+
         const arabicEd = data.find(e => e.edition.identifier === 'quran-uthmani');
         const transliEd = data.find(e => e.edition.identifier === 'en.transliteration');
         const translaEd = data.find(e => e.edition.identifier === 'ms.basmeih');
@@ -100,20 +104,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- UI RENDERING & UPDATES ---
     function render() {
-        dom.loader.style.display = state.isLoading ? 'flex' : 'none';
-        dom.errorContainer.style.display = state.error ? 'flex' : 'none';
-        dom.mainContent.style.display = (state.surahData && !state.isLoading && !state.error) ? 'block' : 'none';
-        
-        if(state.error) dom.errorContainer.querySelector('p').textContent = state.error;
+        if (dom.loader) dom.loader.style.display = state.isLoading ? 'flex' : 'none';
+        if (dom.errorContainer) dom.errorContainer.style.display = state.error ? 'flex' : 'none';
+        if (dom.mainContent) dom.mainContent.style.display = (state.surahData && !state.isLoading && !state.error) ? 'block' : 'none';
+
+        if(state.error && dom.errorContainer) dom.errorContainer.querySelector('p').textContent = state.error;
 
         if (state.surahData) {
-            dom.surahName.textContent = state.surahData.name;
-            dom.surahEnglishName.textContent = state.surahData.englishName;
-            dom.goToVerseInput.max = state.surahData.verses.length;
+            if (dom.surahName) dom.surahName.textContent = state.surahData.name;
+            if (dom.surahEnglishName) dom.surahEnglishName.textContent = state.surahData.englishName;
+            if (dom.goToVerseInput) dom.goToVerseInput.max = state.surahData.verses.length;
             renderAllVerses();
         }
     }
-    
+
     function renderAllVerses() {
         const fragment = document.createDocumentFragment();
         state.surahData.verses.forEach(verse => {
@@ -135,16 +139,19 @@ document.addEventListener('DOMContentLoaded', () => {
             <div class="ilmu-kahf-verse-header">
                 <span class="ilmu-kahf-verse-number">${verse.numberInSurah}</span>
                 <div class="ilmu-kahf-verse-actions">
-                    <button title="Play Audio" data-action="play">
+                    <button class="ilmu-sak-action-button" title="Play Audio" data-action="play">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd" /></svg>
                     </button>
-                    <button title="Copy Verse" data-action="copy">
+                    <button class="ilmu-sak-action-button" title="Copy Verse" data-action="copy">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
                     </button>
-                    <button title="Share Verse" data-action="share">
+                    <button class="ilmu-sak-action-button ilmu-sak-action-share" title="Share Verse" data-action="share">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12s-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.368a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z" /></svg>
                     </button>
-                    <button title="${isBookmarked ? 'Remove Bookmark' : 'Add Bookmark'}" data-action="bookmark">
+                    <button class="ilmu-sak-action-button ilmu-sak-action-sync" title="Sync Verse" data-action="sync">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 6V3L8 7l4 4V8c2.76 0 5 2.24 5 5a5 5 0 01-9.9 1H5.02A7 7 0 019 5.07 7 7 0 0119 12c0-3.86-3.14-7-7-7z"/></svg>
+                    </button>
+                    <button class="ilmu-sak-action-button" title="${isBookmarked ? 'Remove Bookmark' : 'Add Bookmark'}" data-action="bookmark">
                        ${isBookmarked 
                          ? `<svg class="ilmu-kahf-bookmarked-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M5 4a2 2 0 012-2h6a2 2 0 012 2v14l-5-2.5L5 18V4z" /></svg>`
                          : `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" /></svg>`
@@ -162,11 +169,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updatePlayPauseIcon() {
+        if (!dom.playIcon || !dom.pauseIcon) return;
         dom.playIcon.style.display = state.isPlaying ? 'none' : 'block';
         dom.pauseIcon.style.display = state.isPlaying ? 'block' : 'none';
     }
 
     function updateAutoScrollIcon() {
+        if (!dom.scrollIcon || !dom.noScrollIcon) return;
         dom.scrollIcon.style.display = state.isAutoScroll ? 'block' : 'none';
         dom.noScrollIcon.style.display = state.isAutoScroll ? 'none' : 'block';
     }
@@ -183,7 +192,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     }
-    
+
     function updateVerseVisibility() {
         app.style.setProperty('--ilmu-kahf-show-arabic', state.displayOptions.showArabic ? 'block' : 'none');
         app.style.setProperty('--ilmu-kahf-show-transliteration', state.displayOptions.showTransliteration ? 'block' : 'none');
@@ -206,11 +215,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const verseNum = parseInt(key.split('-')[1]);
         return state.surahData.verses[verseNum - 1];
     }
-    
+
     function playVerse(verseKey) {
         const verse = getVerseByKey(verseKey);
         if (verse && dom.audioPlayer) {
-            dom.audioPlayer.src = verse.audio;
+            dom.audioPlayer.src = verse.audio || '';
             dom.audioPlayer.play().then(() => {
                 state.isPlaying = true;
                 state.currentVerseKey = verseKey;
@@ -234,7 +243,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         updatePlayPauseIcon();
     }
-    
+
     function playNextVerse() {
         if (!state.surahData || !state.currentVerseKey) return;
         const currentNum = parseInt(state.currentVerseKey.split('-')[1]);
@@ -247,13 +256,36 @@ document.addEventListener('DOMContentLoaded', () => {
             highlightActiveVerse();
         }
     }
-    
+
+    // tiny visual toast for sync feedback (non-blocking)
+    function showSyncToast(verseEl, msg = 'Synced') {
+        const t = document.createElement('div');
+        t.className = 'ilmu-kahf-sync-toast';
+        t.textContent = msg;
+        Object.assign(t.style, {
+            position: 'absolute',
+            right: '12px',
+            top: '12px',
+            background: 'rgba(0,0,0,0.7)',
+            color: '#fff',
+            padding: '6px 8px',
+            borderRadius: '6px',
+            fontSize: '12px',
+            zIndex: 2147483647,
+            pointerEvents: 'none',
+        });
+        verseEl.style.position = 'relative';
+        verseEl.appendChild(t);
+        setTimeout(() => t.remove(), 1400);
+    }
+
     function handleVerseAction(e) {
         const target = e.target.closest('button');
         if (!target) return;
 
         const action = target.dataset.action;
         const verseEl = target.closest('.ilmu-kahf-verse');
+        if (!verseEl) return;
         const verseNum = parseInt(verseEl.dataset.verseNumber);
         const verse = state.surahData.verses[verseNum - 1];
 
@@ -270,14 +302,43 @@ document.addEventListener('DOMContentLoaded', () => {
                     .catch(() => alert('Failed to copy.'));
                 break;
             case 'share':
-                 if (navigator.share) {
+                if (navigator.share) {
                     navigator.share({
                         title: `Surah Al-Kahf, Ayah ${verse.numberInSurah}`,
                         text: `${verse.translationText} - (Al-Kahf: ${verse.numberInSurah})`,
                         url: window.location.href
                     }).catch(console.error);
                 } else {
-                    alert('Share API not supported. Please copy the verse instead.');
+                    // fallback: copy short payload + notify
+                    const short = `${verse.translationText} — Al-Kahf:${verse.numberInSurah} (${window.location.href})`;
+                    navigator.clipboard.writeText(short)
+                        .then(() => alert('Verse text copied to clipboard for sharing.'))
+                        .catch(() => alert('Share not supported and copy failed.'));
+                }
+                break;
+            case 'sync':
+                // Sync action: refresh audio src for this verse and show visual feedback
+                // (non-destructive, idempotent)
+                try {
+                    // try to re-fetch audio if available (simple refetch pattern)
+                    if (verse.audio) {
+                        // quick reload: reassign src + load
+                        const prevSrc = verse.audio;
+                        const a = new Audio();
+                        a.src = prevSrc;
+                        a.load();
+                        // small visual feedback
+                        showSyncToast(verseEl, 'Synced ✅');
+                        // optionally replace main audio if current verse playing
+                        if (state.currentVerseKey === `verse-${verseNum}`) {
+                            dom.audioPlayer.src = prevSrc;
+                        }
+                    } else {
+                        showSyncToast(verseEl, 'No audio to sync');
+                    }
+                } catch (err) {
+                    console.error('Sync failed:', err);
+                    showSyncToast(verseEl, 'Sync failed');
                 }
                 break;
             case 'bookmark':
@@ -293,7 +354,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 break;
         }
     }
-    
+
     function scrollToVerse(verseNumber) {
         const verseEl = app.querySelector(`#verse-${verseNumber}`);
         if(verseEl) {
@@ -317,24 +378,24 @@ document.addEventListener('DOMContentLoaded', () => {
             render();
         }
 
-        // Attach event listeners
-        dom.playPauseBtn.addEventListener('click', handlePlayPause);
-        dom.audioPlayer.addEventListener('ended', playNextVerse);
-        dom.playerContainer.addEventListener('click', handleVerseAction);
+        // Attach event listeners if elements exist
+        if (dom.playPauseBtn) dom.playPauseBtn.addEventListener('click', handlePlayPause);
+        if (dom.audioPlayer) dom.audioPlayer.addEventListener('ended', playNextVerse);
+        if (dom.playerContainer) dom.playerContainer.addEventListener('click', handleVerseAction);
 
-        dom.autoScrollBtn.addEventListener('click', () => {
+        if (dom.autoScrollBtn) dom.autoScrollBtn.addEventListener('click', () => {
             state.isAutoScroll = !state.isAutoScroll;
             updateAutoScrollIcon();
         });
 
-        dom.storyNavigator.addEventListener('click', (e) => {
+        if (dom.storyNavigator) dom.storyNavigator.addEventListener('click', (e) => {
             const btn = e.target.closest('button');
             if (btn && btn.dataset.verse) {
                 scrollToVerse(parseInt(btn.dataset.verse));
             }
         });
-        
-        dom.goToVerseForm.addEventListener('submit', (e) => {
+
+        if (dom.goToVerseForm) dom.goToVerseForm.addEventListener('submit', (e) => {
             e.preventDefault();
             const num = parseInt(dom.goToVerseInput.value);
             if (num > 0 && num <= state.surahData.verses.length) {
@@ -345,30 +406,30 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        dom.settingsBtn.addEventListener('click', () => {
+        if (dom.settingsBtn) dom.settingsBtn.addEventListener('click', () => {
             dom.settingsPopup.classList.toggle('ilmu-kahf-show');
         });
-        
+
         document.addEventListener('click', (e) => {
-            if (!dom.settingsBtn.contains(e.target) && !dom.settingsPopup.contains(e.target)) {
+            if (dom.settingsBtn && dom.settingsPopup && !dom.settingsBtn.contains(e.target) && !dom.settingsPopup.contains(e.target)) {
                 dom.settingsPopup.classList.remove('ilmu-kahf-show');
             }
         });
 
-        dom.arabicToggle.addEventListener('change', (e) => {
+        if (dom.arabicToggle) dom.arabicToggle.addEventListener('change', (e) => {
             state.displayOptions.showArabic = e.target.checked;
             updateVerseVisibility();
         });
-        dom.transliterationToggle.addEventListener('change', (e) => {
+        if (dom.transliterationToggle) dom.transliterationToggle.addEventListener('change', (e) => {
             state.displayOptions.showTransliteration = e.target.checked;
             updateVerseVisibility();
         });
-        dom.translationToggle.addEventListener('change', (e) => {
+        if (dom.translationToggle) dom.translationToggle.addEventListener('change', (e) => {
             state.displayOptions.showTranslation = e.target.checked;
             updateVerseVisibility();
         });
-        
-        dom.scrollToTopBtn.addEventListener('click', () => {
+
+        if (dom.scrollToTopBtn) dom.scrollToTopBtn.addEventListener('click', () => {
             window.scrollTo({ top: 0, behavior: 'smooth' });
         });
 
