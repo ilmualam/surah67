@@ -273,7 +273,7 @@ const AUDIO_BASE = 'https://everyayah.com/data/Alafasy_128kbps/';
     const globalNum = SURAH_START + idx;
     
     // NEW (correct):
-audio.src = `${AUDIO_BASE}067${String(idx + 1).padStart(3, '0')}.mp3`;
+    audio.src = `${AUDIO_BASE}067${String(idx + 1).padStart(3, '0')}.mp3`;
     audio.play().catch(e => console.warn('Audio play failed:', e));
     
     isPlaying = true;
