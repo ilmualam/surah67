@@ -185,8 +185,8 @@
     }
   ];
   
-  // Audio base URL
-  const AUDIO_BASE = 'https://api.alquran.cloud/v1/surah/67/editions/ar.alafasy,ms.basmeih,en.transliteration';
+  // Audio base URL - EveryAyah CDN for Mishary Alafasy
+const AUDIO_BASE = 'https://everyayah.com/data/Alafasy_128kbps/';
   const SURAH_START = 5545; // First ayat of Al-Mulk in global numbering
   
   // State
@@ -272,8 +272,8 @@
     currentAyat = idx;
     const globalNum = SURAH_START + idx;
     
-    // Update audio source
-    audio.src = `${AUDIO_BASE}${globalNum}.mp3`;
+    // NEW (correct):
+audio.src = `${AUDIO_BASE}067${String(idx + 1).padStart(3, '0')}.mp3`;
     audio.play().catch(e => console.warn('Audio play failed:', e));
     
     isPlaying = true;
