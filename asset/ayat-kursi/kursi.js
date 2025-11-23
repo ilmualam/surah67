@@ -85,11 +85,11 @@
         }
         .ia-ak-rumi {
             font-size: 1.1rem;
-            color: ${CONFIG.primaryColor};
-            text-align: center;
+            color: ${CONFIG.darkColor};
+            text-align: left;
             margin-bottom: 20px;
             font-style: italic;
-            line-height: 1.6;
+            line-height: 1.4;
             padding: 15px;
             background: ${CONFIG.lightColor};
             border-radius: 8px;
@@ -97,8 +97,8 @@
         .ia-ak-malay {
             font-size: 1rem;
             color: #444;
-            text-align: center;
-            line-height: 1.7;
+            text-align: left;
+            line-height: 1.5;
         }
         .ia-ak-footer {
             border-top: 1px solid #eee;
