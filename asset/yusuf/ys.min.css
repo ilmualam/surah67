@@ -19,8 +19,8 @@
 .ilmu-x-table th{background:var(--ilmu-primary);color:#fff;font-weight:600}
 .ilmu-x-table tr:nth-child(even){background:var(--ilmu-light)}
 .ilmu-x-arabic{font-size:1.8rem;line-height:2.2;text-align:right;direction:rtl;color:var(--ilmu-dark);font-weight:500;margin:16px 0;padding:16px;background:var(--ilmu-light);border-radius:6px}
-.ilmu-x-rumi{font-size:1.05rem;color:#555;font-style:italic;margin:12px 0;padding:12px;background:#f8f9fa;border:1px dashed var(--ilmu-primary);border-radius:4px}
-.ilmu-x-translation{font-size:1rem;color:#2c3e50;margin:12px 0;padding:12px;background:#fff8e1;border:1px dashed #ffc107;border-radius:4px}
+.ilmu-x-rumi{font-size:1.05rem;color:#0c3808;font-style:italic;margin:12px 0;padding:12px;background:#ecfae5;border:1px dashed #0c3808;border-radius:5px}
+.ilmu-x-translation{font-size:1rem;color:#2c3e50;margin:12px 0;padding:12px;background:#fff8e1;border:1px dashed #fcfcf9;border-radius:5px}
 .ilmu-x-tool-container{background:#fff;padding:0;margin:24px 0;border-radius:8px;box-shadow:0 4px 12px var(--ilmu-shadow)}
 .ilmu-x-tool-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px}
 .ilmu-x-tool-controls{display:flex;gap:8px;flex-wrap:wrap}
