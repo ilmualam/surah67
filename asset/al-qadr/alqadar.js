@@ -129,7 +129,7 @@
       this.container.innerHTML = `
         <div class="ilmu-alqadr-container">
           <div class="ilmu-alqadr-header">
-            <h2>${SURAH_DATA.name} (${SURAH_DATA.nameArabic})</h2>
+            <h2 style="color:#fff;">${SURAH_DATA.name} (${SURAH_DATA.nameArabic})</h2>
             <p>${SURAH_DATA.verses} Ayat • ${SURAH_DATA.revelation} • Surah ${SURAH_DATA.number}</p>
           </div>
           
@@ -139,7 +139,7 @@
 
           <div class="ilmu-alqadr-controls">
             <button class="ilmu-alqadr-btn" id="play-all">
-              <span>▶</span> Main Semua
+              <span>▶</span> Play Semua
             </button>
             <button class="ilmu-alqadr-btn secondary" id="toggle-tafsir">
               ${this.settings.showTafsir ? 'Sembunyikan' : 'Tunjuk'} Tafsir
