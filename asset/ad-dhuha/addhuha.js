@@ -15,18 +15,6 @@
   'use strict';
 
   // =========================
-  //  DOMAIN PROTECTION
-  // =========================
-  const ALLOWED_DOMAIN = 'ilmualam.com';
-  if (
-    !window.location.hostname.includes(ALLOWED_DOMAIN) &&
-    !window.location.hostname.includes('localhost')
-  ) {
-    console.error('Unauthorized domain. This tool is licensed for ilmualam.com only.');
-    return;
-  }
-
-  // =========================
   //  SURAH DATA
   // =========================
   const surahData = {
