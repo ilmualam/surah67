@@ -69,7 +69,7 @@
             outline: none;
         }
         .ia-main-play-btn {
-            background: ${CONFIG.darkColor};
+            background: #249749;
             color: white;
             border: none;
             padding: 8px 16px;
@@ -121,7 +121,7 @@
             gap: 8px;
         }
         .ia-mini-btn {
-            background: #f5f5f5;
+            background: #edfff5;
             border: none;
             padding: 6px 12px;
             border-radius: 6px;
@@ -133,7 +133,7 @@
             font-size: 0.85rem;
             transition: all 0.2s;
         }
-        .ia-mini-btn:hover { background: #e0e0e0; color: ${CONFIG.primaryColor}; }
+        .ia-mini-btn:hover {background: #dffff2; color: ${CONFIG.primaryColor}; }
 
         /* Text Styles */
         .ia-arabic-text {
@@ -142,20 +142,26 @@
             text-align: right;
             line-height: 2.3;
             margin-bottom: 15px;
-            color: #000;
+            color: #0c3803;
             direction: rtl;
         }
         .ia-rumi-text {
-            color: ${CONFIG.primaryColor};
-            font-size: 0.95rem;
+            color: #0c3808;
+            background-color:#e8fff8;
+            border:1px dashed;
+            border-color:#0c3808;
+            padding:5px;
+            margin:5px;
+            border-radius:6px
+            font-size: 0.85rem;
             font-style: italic;
             margin-bottom: 8px;
-            line-height: 1.5;
+            line-height: 1.3;
         }
         .ia-malay-text {
             color: #444;
-            font-size: 1rem;
-            line-height: 1.6;
+            font-size: 0.9rem;
+            line-height: 1.3;
         }
 
         /* Load More Button */
