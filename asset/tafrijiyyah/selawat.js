@@ -4,7 +4,7 @@
   const currentDomain = window.location.hostname;
   const isAllowed = allowedDomains.some(domain => currentDomain.includes(domain));
   if (!isAllowed) {
-    document.body.innerHTML = '<h1 style="text-align:center;margin-top:50px;">Akses tidak dibenarkan</h1>';
+    document.body.innerHTML = '<h2 style="text-align:center;margin-top:50px;">Akses tidak dibenarkan</h2>';
     return;
   }
 })();
