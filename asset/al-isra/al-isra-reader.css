@@ -25,7 +25,7 @@
 .ilmu-icon-btn{background:none;border:none;cursor:pointer;padding:8px;border-radius:6px;color:#666;transition:all 0.2s;display:inline-flex;align-items:center;justify-content:center}
 .ilmu-icon-btn:hover{background-color:#f5f5f5;color:#249749}
 .ilmu-icon-btn.active{color:#249749;background-color:#e8f5e9}
-.ilmu-ayah-arabic{font-size:1.8em;line-height:2.2;text-align:right;direction:rtl;color:#0c3808;margin:16px 0;font-family:'Traditional Arabic',serif}
+.ilmu-ayah-arabic{font-size:2.2em;line-height:2;text-align:right;direction:rtl;color:#0c3808;margin:16px 0;font-family:'Amiri',Traditional Arabic,serif}
 .ilmu-ayah-rumi{background-color:#f9f9f9;padding:12px;border-radius:6px;font-style:italic;color:#555;margin:12px 0;font-size:0.95em;line-height:1.8}
 .ilmu-ayah-translation{color:#0c3808;line-height:1.8;margin-top:12px;font-size:0.98em}
 .ilmu-toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(100px);background-color:#0c3808;color:#fff;padding:12px 24px;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,0.2);z-index:10000;opacity:0;transition:all 0.3s;white-space:nowrap}
@@ -55,7 +55,7 @@
 .ilmu-reader-controls{padding:12px;gap:8px}
 .ilmu-btn{padding:8px 16px;font-size:0.9em}
 .ilmu-ayah-card{padding:16px}
-.ilmu-ayah-arabic{font-size:1.5em;line-height:2}
+.ilmu-ayah-arabic{font-family:'Amiri'Traditional Arabic,serif,;font-size:1.8em;line-height:2}
 .ilmu-ayah-number{width:32px;height:32px;font-size:1em}
 .ilmu-icon-btn{padding:6px}
 .ilmu-ayah-rumi{font-size:0.9em}
@@ -64,6 +64,6 @@
 @media(max-width:480px){
 .ilmu-reader-header{padding:16px}
 .ilmu-reader-header h2{font-size:1.2em}
-.ilmu-ayah-arabic{font-size:1.3em}
+.ilmu-ayah-arabic{font-family:'Amiri'Traditional Arabic,serif,;font-size:1.8em;}
 .ilmu-btn{padding:6px 12px;font-size:0.85em}
 }
