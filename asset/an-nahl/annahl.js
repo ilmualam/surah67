@@ -86,7 +86,7 @@
         .ilmu-quran-ayah-number{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;background:#249749;color:#fff;border-radius:50%;font-weight:700;font-size:0.875rem;margin-bottom:0.75rem;cursor:pointer;transition:all 0.2s}
         .ilmu-quran-ayah-number:hover{transform:scale(1.1)}
         .ilmu-quran-arabic{font-family:"Amiri","Traditional Arabic","Al Qalam Quran Majeed","Arabic Typesetting",serif;font-size:28px;line-height:2;text-align:right;color:#0c3808;margin-bottom:0.75rem;direction:rtl}
-        .ilmu-quran-transliteration{font-size:14px;line-height:1.5;text-align:left;color:#0c3808;font-style:italic;margin-bottom:0.75rem;border:1px dashed;border-color:#0c3803;border-radius:5px;background-color:#f8fdf9;}
+        .ilmu-quran-transliteration{font-size:14px;line-height:1.5;text-align:left;color:#0c3808;font-style:italic;margin-bottom:0.75rem;border:1px dashed;border-color:#0c3803;border-radius:5px;background-color:#f8fdf9;padding:5px;margin-bottom:5px;}
         .ilmu-quran-translation{font-size:15px;text-align:left;line-height:1.5;color:#0c3808;margin-bottom:0.75rem}
         .ilmu-quran-actions{display:flex;gap:0.5rem;flex-wrap:wrap}
         .ilmu-quran-action-btn{background:#f8f9fa;border:1px solid #ddd;color:#0c3808;padding:0.4rem 0.75rem;border-radius:6px;font-size:0.75rem;cursor:pointer;transition:all 0.2s;display:inline-flex;align-items:center;gap:0.25rem}
