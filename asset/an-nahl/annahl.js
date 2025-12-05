@@ -123,7 +123,7 @@
               <div class="ilmu-quran-progress-bar" id="progressBar"></div>
             </div>
           </div>
-          <button class="ilmu-quran-btn" id="settingsBtn">⚙️ Tetapan</button>
+          <button class="ilmu-quran-btn" id="settingsBtn">⚙️ Setting</button>
         </div>
         <div class="ilmu-quran-settings" id="settingsPanel">
           <div class="ilmu-quran-setting-item">
@@ -193,9 +193,9 @@
         <div class="ilmu-quran-transliteration" style="font-size:${state.settings.translationSize}px;display:${state.settings.showRumi ? 'block' : 'none'}">${ayah.transliteration}</div>
         <div class="ilmu-quran-translation" style="font-size:${state.settings.translationSize}px">${ayah.translation}</div>
         <div class="ilmu-quran-actions">
-          <button class="ilmu-quran-action-btn" data-action="play" data-ayah="${ayah.number}">▶ Main</button>
-          <button class="ilmu-quran-action-btn" data-action="copy" data-ayah="${ayah.number}">📋 Salin</button>
-          <button class="ilmu-quran-action-btn" data-action="share" data-ayah="${ayah.number}">↗️ Kongsi</button>
+          <button class="ilmu-quran-action-btn" data-action="play" data-ayah="${ayah.number}">▶ Play</button>
+          <button class="ilmu-quran-action-btn" data-action="copy" data-ayah="${ayah.number}">📋 Copy</button>
+          <button class="ilmu-quran-action-btn" data-action="share" data-ayah="${ayah.number}">↗️ Share</button>
           <button class="ilmu-quran-action-btn ${state.bookmarks.includes(ayah.number) ? 'active' : ''}" data-action="bookmark" data-ayah="${ayah.number}">
             ${state.bookmarks.includes(ayah.number) ? '★' : '☆'} Bookmark
           </button>
