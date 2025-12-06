@@ -1,487 +1,381 @@
 /**
- * Surah Ad-Dhuha Interactive Tool
- * Copyright © 2025 ilmualam.com
- * 
- * This code is proprietary and confidential.
- * Unauthorized copying, distribution, or modification is strictly prohibited.
- * Licensed exclusively for use on ilmualam.com
- * 
- * @author ilmualam.com
- * @version 2.1.0
- * @license Proprietary
- */
+* Surah Ad-Dhuha Interactive Tool
+* Copyright © 2025 ilmualam.com
+*
+* This code is proprietary and confidential.
+* Unauthorized copying, distribution, or modification is strictly prohibited.
+* Licensed exclusively for use on ilmualam.com
+*
+* @author ilmualam.com
+* @version 2.1.0
+* @license Proprietary
+*/
+// =====================
+// TOOL SURAH AD-DHUHA – AUDIO QURAN CLOUD + AUTO HIGHLIGHT/SCROLL
+// =====================
 
-(function() {
-  'use strict';
+(function () {
+const root = document.getElementById('surah-ad-dhuha-tool');
+if (!root) return;
 
-  // =========================
-  //  SURAH DATA
-  // =========================
-  const surahData = {
-    number: 93,
-    name: 'Ad-Dhuha',
-    verses: [
-      {
-        number: 1,
-        arabic: 'وَٱلضُّحَىٰ',
-        rumi: 'Wad-dhuha',
-        translation: 'Demi waktu Dhuha (pagi yang cerah).',
-        audio: 'https://cdn.islamic.network/quran/audio/128/ar.alafasy/6207.mp3'
-      },
-      {
-        number: 2,
-        arabic: 'وَٱلَّيْلِ إِذَا سَجَىٰ',
-        rumi: 'Wal-layli idza saja',
-        translation: 'Dan demi malam apabila ia menjadi sunyi.',
-        audio: 'https://cdn.islamic.network/quran/audio/128/ar.alafasy/6208.mp3'
-      },
-      {
-        number: 3,
-        arabic: 'مَا وَدَّعَكَ رَبُّكَ وَمَا قَلَىٰ',
-        rumi: "Ma wadda'aka rabbuka wa ma qala",
-        translation: 'Tuhanmu (wahai Muhammad) tidak meninggalkan engkau dan tidak membenci engkau.',
-        audio: 'https://cdn.islamic.network/quran/audio/128/ar.alafasy/6209.mp3'
-      },
-      {
-        number: 4,
-        arabic: 'وَلَلْءَاخِرَةُ خَيْرٌۭ لَّكَ مِنَ ٱلْأُولَىٰ',
-        rumi: 'Walal-akhiratu khayrul laka minal-ula',
-        translation: 'Dan sesungguhnya hari kemudian (akhirat) adalah lebih baik bagimu daripada permulaan (dunia).',
-        audio: 'https://cdn.islamic.network/quran/audio/128/ar.alafasy/6210.mp3'
-      },
-      {
-        number: 5,
-        arabic: 'وَلَسَوْفَ يُعْطِيكَ رَبُّكَ فَتَرْضَىٰ',
-        rumi: "Wa lasawfa yu'tika rabbuka fatardha",
-        translation: 'Dan kelak Tuhanmu pasti memberikan kepadamu (segala nikmat), lalu engkau menjadi redha.',
-        audio: 'https://cdn.islamic.network/quran/audio/128/ar.alafasy/6211.mp3'
-      },
-      {
-        number: 6,
-        arabic: 'أَلَمْ يَجِدْكَ يَتِيمًۭا فَـَٔاوَىٰ',
-        rumi: 'Alam yajidka yatiman fa-awa',
-        translation: 'Bukankah Dia mendapatimu sebagai anak yatim, lalu Dia memberi perlindungan?',
-        audio: 'https://cdn.islamic.network/quran/audio/128/ar.alafasy/6212.mp3'
-      },
-      {
-        number: 7,
-        arabic: 'وَوَجَدَكَ ضَآلًّۭا فَهَدَىٰ',
-        rumi: 'Wa wajadaka dhol-lan fahada',
-        translation: 'Dan Dia mendapatimu dalam keadaan bingung, lalu Dia memberi petunjuk?',
-        audio: 'https://cdn.islamic.network/quran/audio/128/ar.alafasy/6213.mp3'
-      },
-      {
-        number: 8,
-        arabic: 'وَوَجَدَكَ عَآئِلًۭا فَأَغْنَىٰ',
-        rumi: "Wa wajadaka 'a-ilan fa-aghna",
-        translation: 'Dan Dia mendapatimu dalam keadaan miskin, lalu Dia memberikan kekayaan?',
-        audio: 'https://cdn.islamic.network/quran/audio/128/ar.alafasy/6214.mp3'
-      },
-      {
-        number: 9,
-        arabic: 'فَأَمَّا ٱلْيَتِيمَ فَلَا تَقْهَرْ',
-        rumi: 'Fa-ammal yatima fala taqhar',
-        translation: 'Maka terhadap anak yatim, janganlah kamu berlaku sewenang-wenangnya.',
-        audio: 'https://cdn.islamic.network/quran/audio/128/ar.alafasy/6215.mp3'
-      },
-      {
-        number: 10,
-        arabic: 'وَأَمَّا ٱلسَّآئِلَ فَلَا تَنْهَرْ',
-        rumi: 'Wa ammas-sa-ila fala tanhar',
-        translation: 'Dan terhadap orang yang meminta-minta, janganlah kamu menghardiknya.',
-        audio: 'https://cdn.islamic.network/quran/audio/128/ar.alafasy/6216.mp3'
-      },
-      {
-        number: 11,
-        arabic: 'وَأَمَّا بِنِعْمَةِ رَبِّكَ فَحَدِّثْ',
-        rumi: "Wa amma bi ni'mati rabbika fahaddith",
-        translation: 'Dan terhadap nikmat Tuhanmu, maka hendaklah kamu sebar-sebarkan (dengan bersyukur).',
-        audio: 'https://cdn.islamic.network/quran/audio/128/ar.alafasy/6217.mp3'
-      }
-    ]
-  };
+const versesContainer = root.querySelector('#verses-container');
+const playToggle = root.querySelector('#play-toggle');
+const progressBar = root.querySelector('#audio-progress');
+const progressFill = root.querySelector('#audio-progress-fill');
+const timeDisplay = root.querySelector('#time-display');
+const statAyah = root.querySelector('#stat-ayah-count');
+const statProgress = root.querySelector('#stat-progress');
+const statBookmarks = root.querySelector('#stat-bookmarks');
+const controlsPanel = root.querySelector('.controls-panel');
+const shareButtons = root.querySelector('.share-buttons');
+const audio = root.querySelector('#surah-ad-dhuha-audio'); // <audio> Quran Cloud
 
-  // =========================
-  //  TOOL STATE
-  =========================
-  // Safe localStorage parser
-  function safeParse(key, fallback) {
-    try {
-      const raw = localStorage.getItem(key);
-      return raw ? JSON.parse(raw) : fallback;
-    } catch (e) {
-      console.warn('[Ad-Dhuha] localStorage corrupted for', key, e);
-      return fallback;
-    }
-  }
+// ====== DATA SURAH (11 AYAT) ======
+const SURAH_AD_DHUHA = [
+{ ayah: 1, arabic: 'وَالضُّحَىٰ', rumi: 'Wad-dhuha', translation: 'Demi waktu Dhuha (pagi yang cerah),' },
+{ ayah: 2, arabic: 'وَاللَّيْلِ إِذَا سَجَىٰ', rumi: 'Wal-layli idza saja', translation: 'Dan demi malam apabila ia menjadi sunyi,' },
+{ ayah: 3, arabic: 'مَا وَدَّعَكَ رَبُّكَ وَمَا قَلَىٰ', rumi: 'Ma wadda‘aka rabbuka wa ma qala', translation: 'Tuhanmu (wahai Muhammad) tidak meninggalkan engkau dan tidak membenci engkau.' },
+{ ayah: 4, arabic: 'وَلَلْآخِرَةُ خَيْرٌ لَّكَ مِنَ الْأُولَىٰ', rumi: 'Walal-ākhiratu khayrul laka minal-ūlā', translation: 'Dan sesungguhnya hari kemudian (akhirat) adalah lebih baik bagimu daripada permulaan (dunia).' },
+{ ayah: 5, arabic: 'وَلَسَوْفَ يُعْطِيكَ رَبُّكَ فَتَرْضَىٰ', rumi: 'Wa lasawfa yu‘țīka rabbuka fa tarḍā', translation: 'Dan kelak Tuhanmu pasti memberikan kepadamu (segala nikmat), lalu engkau menjadi reda.' },
+{ ayah: 6, arabic: 'أَلَمْ يَجِدْكَ يَتِيمًا فَآوَىٰ', rumi: 'Alam yajidka yatīman fa-āwā', translation: 'Bukankah Dia mendapatimu sebagai anak yatim, lalu Dia memberi perlindungan?' },
+{ ayah: 7, arabic: 'وَوَجَدَكَ ضَالًّا فَهَدَىٰ', rumi: 'Wa wajadaka ḍāllan fahadā', translation: 'Dan Dia mendapatimu dalam keadaan tidak mengetahui (jalan yang lengkap), lalu Dia memberi petunjuk?' },
+{ ayah: 8, arabic: 'وَوَجَدَكَ عَائِلًا فَأَغْنَىٰ', rumi: 'Wa wajadaka ‘āilan fa-aghna', translation: 'Dan Dia mendapatimu dalam keadaan miskin, lalu Dia memberikan kecukupan?' },
+{ ayah: 9, arabic: 'فَأَمَّا الْيَتِيمَ فَلَا تَقْهَرْ', rumi: 'Fa ammāl-yatīma falā taqhar', translation: 'Maka terhadap anak yatim, janganlah kamu berlaku sewenang-wenangnya.' },
+{ ayah: 10, arabic: 'وَأَمَّا السَّائِلَ فَلَا تَنْهَرْ', rumi: 'Wa ammās-sā-ila falā tanhar', translation: 'Dan terhadap orang yang meminta-minta, janganlah kamu menghardiknya.' },
+{ ayah: 11, arabic: 'وَأَمَّا بِنِعْمَةِ رَبِّكَ فَحَدِّثْ', rumi: 'Wa ammā bini‘mati rabbika faḥaddith', translation: 'Dan terhadap nikmat Tuhanmu, maka hendaklah kamu sebar-sebarkan (dengan bersyukur).' }
+];
 
-  // Global State Management
-  let currentState = {
-    showArabic: true,
-    showRumi: true,
-    showMalay: true,
-    darkMode: false,
-    isPlaying: false,
-    currentVerse: 0,
-    progress: safeParse('surahAdDhuhaProgress', {}),
-    bookmarks: safeParse('surahAdDhuhaBookmarks', [])
-  };
+const STORAGE_KEY = 'ilmu_ad_dhuha_state_v1';
 
-  // Audio Management
-  let audioElement = new Audio();
-  let audioContext = null;
+function loadState() {
+try {
+const raw = localStorage.getItem(STORAGE_KEY);
+if (!raw) return { completed: [], bookmarks: [] };
+const parsed = JSON.parse(raw);
+return {
+completed: Array.isArray(parsed.completed) ? parsed.completed : [],
+bookmarks: Array.isArray(parsed.bookmarks) ? parsed.bookmarks : [],
+};
+} catch (e) {
+return { completed: [], bookmarks: [] };
+}
+}
 
-  // =========================
-  //  INIT TOOL
-  // =========================
-  function initSurahTool() {
-    const container = document.getElementById('surah-ad-dhuha-tool');
-    if (!container) return;
+function saveState(state) {
+try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {}
+}
 
-    container.innerHTML = `
-      <div class="surah-tool-container ${currentState.darkMode ? 'dark-mode' : ''}">
-        <div class="tool-header">
-          <h3>🌅 Tool Interaktif Surah Ad-Dhuha (Rumi, Terjemahan &amp; Audio)</h3>
-          <p>
-            Bacaan <strong>Surah Ad-Dhuha rumi</strong>, teks Arab bertajwid, 
-            <strong>terjemahan Melayu ringkas</strong>, audio ayat demi ayat, 
-            bookmark &amp; progress <strong>hafazan Surah Ad-Dhuha</strong> – 
-            semua dalam satu tool Al-Quran online di IlmuAlam.com.
-          </p>
-        </div>
+let state = loadState();
+let currentAyahIndex = -1; // index dalam array (0–10)
 
-        <div class="controls-panel">
-          <button class="control-btn ${currentState.showArabic ? 'active' : ''}" onclick="toggleDisplay('arabic')">
-            📖 Arab
-          </button>
-          <button class="control-btn ${currentState.showRumi ? 'active' : ''}" onclick="toggleDisplay('rumi')">
-            🔤 Rumi
-          </button>
-          <button class="control-btn ${currentState.showMalay ? 'active' : ''}" onclick="toggleDisplay('malay')">
-            🇲🇾 Terjemahan BM
-          </button>
-          <button class="control-btn ${currentState.darkMode ? 'active' : ''}" onclick="toggleDarkMode()">
-            ${currentState.darkMode ? '☀️ Light Mode' : '🌙 Dark Mode'}
-          </button>
-          <button class="control-btn" onclick="resetProgress()">
-            🔄 Reset Hafazan
-          </button>
-        </div>
+// ====== BUILD VERSES ======
+function buildVerses() {
+if (!versesContainer) return;
 
-        <div class="audio-controls">
-          <button class="play-btn" onclick="toggleAudio()">
-            ${currentState.isPlaying ? '⏸' : '▶️'}
-          </button>
-          <div class="progress-bar" onclick="seekAudio(event)">
-            <div class="progress-fill" id="audioProgress"></div>
-          </div>
-          <div class="time-display" id="timeDisplay">0:00 / 0:00</div>
-        </div>
+const completedSet = new Set(state.completed || []);
+const bookmarkSet = new Set(state.bookmarks || []);
+let html = '';
 
-        <div class="verses-container" id="versesContainer"></div>
+SURAH_AD_DHUHA.forEach(v => {
+const isCompleted = completedSet.has(v.ayah);
+const isBookmarked = bookmarkSet.has(v.ayah);
 
-        <div class="stats-panel">
-          <div class="stat-item">
-            <div class="stat-value" id="totalVerses">${surahData.verses.length}</div>
-            <div class="stat-label">Jumlah Ayat</div>
-          </div>
-          <div class="stat-item">
-            <div class="stat-value" id="completedVerses">0</div>
-            <div class="stat-label">Ayat Dihafal (Hafazan)</div>
-          </div>
-          <div class="stat-item">
-            <div class="stat-value" id="progressPercentage">0%</div>
-            <div class="stat-label">Progress Hafazan</div>
-          </div>
-          <div class="stat-item">
-            <div class="stat-value" id="bookmarkCount">0</div>
-            <div class="stat-label">Ayat Favorite / Bookmark</div>
-          </div>
-        </div>
+html += `
+<article class="verse-card" data-ayah="${v.ayah}">
+<header class="verse-header">
+<div class="verse-number">${v.ayah}</div>
+<div class="verse-actions">
+<button type="button" class="action-icon action-play" aria-label="Mainkan ayat ${v.ayah}">▶</button>
+<button type="button" class="action-icon action-complete ${isCompleted ? 'active' : ''}" aria-label="Tanda ayat ${v.ayah} telah dikuasai">✓</button>
+<button type="button" class="action-icon action-bookmark ${isBookmarked ? 'active' : ''}" aria-label="Tanda ayat ${v.ayah} sebagai kegemaran">★</button>
+</div>
+</header>
+<p class="verse-arabic">${v.arabic}</p>
+<p class="verse-rumi">${v.rumi}</p>
+<p class="verse-translation">${v.translation}</p>
+</article>
+`;
+});
 
-        <div class="share-buttons">
-          <button class="share-btn whatsapp" onclick="shareToWhatsApp()">
-            📱 Share WhatsApp
-          </button>
-          <button class="share-btn telegram" onclick="shareToTelegram()">
-            ✈️ Share Telegram
-          </button>
-          <button class="share-btn copy" onclick="copyLink()">
-            🔗 Copy Link
-          </button>
-        </div>
-      </div>
-    `;
+versesContainer.innerHTML = html;
+if (statAyah) statAyah.textContent = String(SURAH_AD_DHUHA.length);
+updateStats();
+}
 
-    renderVerses();
-    updateStats();
+// ====== AUDIO UTILITY ======
+function formatTime(sec) {
+if (!isFinite(sec)) return '00:00';
+const m = Math.floor(sec / 60);
+const s = Math.floor(sec % 60);
+return String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+}
 
-    audioElement.addEventListener('timeupdate', updateAudioProgress);
-    audioElement.addEventListener('ended', playNextVerse);
-  }
+function updateTimeAndProgress() {
+if (!audio || !progressFill || !timeDisplay) return;
+const current = audio.currentTime || 0;
+const duration = audio.duration || 0;
+const percent = duration ? (current / duration) * 100 : 0;
+progressFill.style.width = percent + '%';
+timeDisplay.textContent = formatTime(current) + ' / ' + formatTime(duration);
 
-  // =========================
-  //  RENDER VERSES
-  // =========================
-  function renderVerses() {
-    const container = document.getElementById('versesContainer');
-    if (!container) return;
+// ====== AUTO AYAT (ANGGARAN BERDASARKAN % AUDIO) ======
+if (duration && versesContainer) {
+let idx = Math.floor((current / duration) * SURAH_AD_DHUHA.length);
+if (idx < 0) idx = 0;
+if (idx >= SURAH_AD_DHUHA.length) idx = SURAH_AD_DHUHA.length - 1;
 
-    container.innerHTML = surahData.verses
-      .map((verse, index) => {
-        const playingClass =
-          currentState.currentVerse === index && currentState.isPlaying
-            ? 'playing'
-            : '';
+if (idx !== currentAyahIndex) {
+currentAyahIndex = idx;
+const card = versesContainer.querySelector('.verse-card[data-ayah="' + (idx + 1) + '"]');
+if (card) {
+setPlayingCard(card, true); // true = scroll
+}
+}
+}
+}
 
-        return `
-        <div class="verse-card ${playingClass}" id="verse-${index}">
-          <div class="verse-header">
-            <div class="verse-number">${verse.number}</div>
-            <div class="verse-actions">
-              <div 
-                class="action-icon ${currentState.progress[index] ? 'active' : ''}" 
-                onclick="toggleProgress(${index})" 
-                title="Tandakan ayat Surah Ad-Dhuha ini sebagai sudah dikuasai">
-                ✓
-              </div>
-              <div 
-                class="action-icon ${currentState.bookmarks.includes(index) ? 'active' : ''}" 
-                onclick="toggleBookmark(${index})" 
-                title="Bookmark ayat favorite untuk rujukan pantas">
-                ⭐
-              </div>
-              <div 
-                class="action-icon" 
-                onclick="playVerse(${index})" 
-                title="Mainkan audio bacaan ayat ${verse.number}">
-                🔊
-              </div>
-            </div>
-          </div>
-          ${
-            currentState.showArabic
-              ? `<div class="verse-arabic">${verse.arabic}</div>`
-              : ''
-          }
-          ${
-            currentState.showRumi
-              ? `<div class="verse-rumi">${verse.rumi}</div>`
-              : ''
-          }
-          ${
-            currentState.showMalay
-              ? `<div class="verse-translation">${verse.translation}</div>`
-              : ''
-          }
-        </div>
-      `;
-      })
-      .join('');
-  }
+// ====== STATS ======
+function updateStats() {
+const total = SURAH_AD_DHUHA.length;
+const completed = (state.completed || []).length;
+const bookmarks = (state.bookmarks || []).length;
 
-  // =========================
-  //  DISPLAY TOGGLES
-  // =========================
-  function toggleDisplay(type) {
-    if (type === 'arabic') currentState.showArabic = !currentState.showArabic;
-    if (type === 'rumi') currentState.showRumi = !currentState.showRumi;
-    if (type === 'malay') currentState.showMalay = !currentState.showMalay;
-    initSurahTool();
-  }
+if (statProgress) {
+const pct = total ? Math.round((completed / total) * 100) : 0;
+statProgress.textContent = pct + '%';
+}
+if (statBookmarks) {
+statBookmarks.textContent = String(bookmarks);
+}
+}
 
-  function toggleDarkMode() {
-    currentState.darkMode = !currentState.darkMode;
-    initSurahTool();
-  }
+function setPlayingCard(card, doScroll) {
+if (!versesContainer) return;
+const cards = versesContainer.querySelectorAll('.verse-card');
+cards.forEach(c => c.classList.remove('playing'));
+if (card) {
+card.classList.add('playing');
+if (doScroll) {
+card.scrollIntoView({
+behavior: 'smooth',
+block: 'center'
+});
+}
+}
+}
 
-  // =========================
-  //  AUDIO CONTROLS
-  // =========================
-  function toggleAudio() {
-    if (currentState.isPlaying) {
-      audioElement.pause();
-      currentState.isPlaying = false;
-    } else {
-      if (!audioElement.src) {
-        playVerse(0);
-      } else {
-        audioElement.play();
-        currentState.isPlaying = true;
-        initSurahTool();
-      }
-    }
-    initSurahTool();
-  }
+// ====== VERSE INTERACTION ======
+if (versesContainer) {
+versesContainer.addEventListener('click', function (e) {
+const target = e.target;
+const card = target.closest('.verse-card');
+if (!card) return;
+const ayah = Number(card.getAttribute('data-ayah'));
+if (!ayah) return;
+const verseIdx = ayah - 1;
 
-  function playVerse(index) {
-    currentState.currentVerse = index;
-    audioElement.src = surahData.verses[index].audio;
-    audioElement.play();
-    currentState.isPlaying = true;
-    initSurahTool();
+// Klik icon PLAY pada ayat
+if (target.closest('.action-play')) {
+currentAyahIndex = verseIdx;
+setPlayingCard(card, true);
 
-    const verseElement = document.getElementById(`verse-${index}`);
-    if (verseElement) {
-      verseElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
-  }
+if (audio) {
+// anggaran posisi audio ikut nisbah ayat
+if (audio.duration && isFinite(audio.duration)) {
+audio.currentTime = (verseIdx / SURAH_AD_DHUHA.length) * audio.duration;
+} else {
+audio.currentTime = 0;
+}
+audio.play().catch(function () {});
+}
+return;
+}
 
-  function playNextVerse() {
-    if (currentState.currentVerse < surahData.verses.length - 1) {
-      playVerse(currentState.currentVerse + 1);
-    } else {
-      currentState.isPlaying = false;
-      currentState.currentVerse = 0;
-      initSurahTool();
-    }
-  }
+// Klik icon COMPLETE
+if (target.closest('.action-complete')) {
+const idx = state.completed.indexOf(ayah);
+const btn = target.closest('.action-complete');
+if (idx === -1) {
+state.completed.push(ayah);
+btn.classList.add('active');
+} else {
+state.completed.splice(idx, 1);
+btn.classList.remove('active');
+}
+saveState(state);
+updateStats();
+return;
+}
 
-  function updateAudioProgress() {
-    const progress = (audioElement.currentTime / audioElement.duration) * 100;
-    const progressFill = document.getElementById('audioProgress');
-    if (progressFill) {
-      progressFill.style.width = `${progress || 0}%`;
-    }
+// Klik icon BOOKMARK
+if (target.closest('.action-bookmark')) {
+const idxB = state.bookmarks.indexOf(ayah);
+const btn = target.closest('.action-bookmark');
+if (idxB === -1) {
+state.bookmarks.push(ayah);
+btn.classList.add('active');
+} else {
+state.bookmarks.splice(idxB, 1);
+btn.classList.remove('active');
+}
+saveState(state);
+updateStats();
+return;
+}
 
-    const timeDisplay = document.getElementById('timeDisplay');
-    if (timeDisplay) {
-      const current = formatTime(audioElement.currentTime);
-      const total = formatTime(audioElement.duration);
-      timeDisplay.textContent = `${current} / ${total}`;
-    }
-  }
+// Klik mana-mana lokasi lain pada kad ayat → hanya highlight + scroll
+if (!target.closest('.action-icon')) {
+currentAyahIndex = verseIdx;
+setPlayingCard(card, true);
+}
+});
+}
 
-  function seekAudio(event) {
-    const progressBar = event.currentTarget;
-    const clickX = event.offsetX;
-    const width = progressBar.offsetWidth;
-    const percentage = clickX / width;
-    if (!isNaN(audioElement.duration)) {
-      audioElement.currentTime = audioElement.duration * percentage;
-    }
-  }
+// ====== MODE PAPARAN (Arab / Rumi / Terjemahan / Tadabbur) ======
+function applyMode(mode) {
+if (!versesContainer) return;
+const cards = versesContainer.querySelectorAll('.verse-card');
 
-  function formatTime(seconds) {
-    if (isNaN(seconds)) return '0:00';
-    const mins = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60);
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
-  }
+cards.forEach(card => {
+const arabic = card.querySelector('.verse-arabic');
+const rumi = card.querySelector('.verse-rumi');
+const translation = card.querySelector('.verse-translation');
+if (!arabic || !rumi || !translation) return;
 
-  // =========================
-  //  PROGRESS & BOOKMARK
-  // =========================
-  function toggleProgress(index) {
-    currentState.progress[index] = !currentState.progress[index];
-    localStorage.setItem(
-      'surahAdDhuhaProgress',
-      JSON.stringify(currentState.progress)
-    );
-    updateStats();
-    renderVerses();
-  }
+let showArabic = true;
+let showRumi = true;
+let showTranslation = true;
 
-  function toggleBookmark(index) {
-    const bookmarkIndex = currentState.bookmarks.indexOf(index);
-    if (bookmarkIndex > -1) {
-      currentState.bookmarks.splice(bookmarkIndex, 1);
-    } else {
-      currentState.bookmarks.push(index);
-    }
-    localStorage.setItem(
-      'surahAdDhuhaBookmarks',
-      JSON.stringify(currentState.bookmarks)
-    );
-    updateStats();
-    renderVerses();
-  }
+if (mode === 'arabic') {
+showArabic = true; showRumi = false; showTranslation = false;
+} else if (mode === 'rumi') {
+showArabic = false; showRumi = true; showTranslation = false;
+} else if (mode === 'translation') {
+showArabic = false; showRumi = false; showTranslation = true;
+} else if (mode === 'tadabbur') {
+showArabic = true; showRumi = false; showTranslation = true;
+}
 
-  function resetProgress() {
-    if (
-      confirm(
-        'Adakah anda pasti mahu reset semua progress & bookmark Surah Ad-Dhuha?'
-      )
-    ) {
-      currentState.progress = {};
-      currentState.bookmarks = [];
-      localStorage.removeItem('surahAdDhuhaProgress');
-      localStorage.removeItem('surahAdDhuhaBookmarks');
-      updateStats();
-      renderVerses();
-    }
-  }
+arabic.style.display = showArabic ? 'block' : 'none';
+rumi.style.display = showRumi ? 'block' : 'none';
+translation.style.display = showTranslation ? 'block' : 'none';
+});
+}
 
-  function updateStats() {
-    const completed = Object.values(currentState.progress).filter(Boolean)
-      .length;
-    const total = surahData.verses.length;
-    const percentage = total ? Math.round((completed / total) * 100) : 0;
+if (controlsPanel) {
+controlsPanel.addEventListener('click', function (e) {
+const btn = e.target.closest('.control-btn');
+if (!btn) return;
 
-    const completedElement = document.getElementById('completedVerses');
-    const percentageElement = document.getElementById('progressPercentage');
-    const bookmarkElement = document.getElementById('bookmarkCount');
+const mode = btn.getAttribute('data-mode');
+const allBtns = controlsPanel.querySelectorAll('.control-btn');
+allBtns.forEach(b => b.classList.remove('active'));
+btn.classList.add('active');
 
-    if (completedElement) completedElement.textContent = completed;
-    if (percentageElement) percentageElement.textContent = `${percentage}%`;
-    if (bookmarkElement) bookmarkElement.textContent =
-      currentState.bookmarks.length;
-  }
+if (mode === 'all') applyMode('all');
+else if (mode === 'arabic') applyMode('arabic');
+else if (mode === 'rumi') applyMode('rumi');
+else if (mode === 'translation') applyMode('translation');
+else if (mode === 'tadabbur') applyMode('tadabbur');
+});
 
-  // =========================
-  //  SHARE FUNCTIONS
-  // =========================
-  function shareToWhatsApp() {
-    const url = encodeURIComponent(window.location.href);
-    const text = encodeURIComponent(
-      'Surah Ad-Dhuha rumi, terjemahan Melayu, tafsir ringkas & tool interaktif (audio + bookmark + hafazan) di IlmuAlam.com. Cuba di sini:'
-    );
-    window.open(`https://wa.me/?text=${text}%20${url}`, '_blank');
-  }
+const firstBtn = controlsPanel.querySelector('.control-btn[data-mode="all"]');
+if (firstBtn) firstBtn.classList.add('active');
+}
 
-  function shareToTelegram() {
-    const url = encodeURIComponent(window.location.href);
-    const text = encodeURIComponent(
-      'Tool interaktif Surah Ad-Dhuha: bacaan rumi, terjemahan Melayu, audio & progress hafazan. Jom tadabbur sama-sama di IlmuAlam.com:'
-    );
-    window.open(
-      `https://t.me/share/url?url=${url}&text=${text}`,
-      '_blank'
-    );
-  }
+// ====== DARK MODE ======
+if (controlsPanel) {
+const darkBtn = controlsPanel.querySelector('[data-toggle="dark"]');
+if (darkBtn) {
+darkBtn.addEventListener('click', function () {
+root.classList.toggle('dark-mode');
+});
+}
+}
 
-  function copyLink() {
-    navigator.clipboard
-      .writeText(window.location.href)
-      .then(() => {
-        alert(
-          'Link Surah Ad-Dhuha berjaya disalin. Kongsi dengan keluarga & rakan anda.'
-        );
-      })
-      .catch(() => {
-        alert('Maaf, link tidak dapat disalin. Cuba lagi.');
-      });
-  }
+// ====== SHARE BUTTONS ======
+if (shareButtons) {
+shareButtons.addEventListener('click', function (e) {
+const btn = e.target.closest('.share-btn');
+if (!btn) return;
+const type = btn.getAttribute('data-share');
+const url = window.location.href.split('#')[0] + '#surah-ad-dhuha-tool';
+const text = 'Tool Interaktif Surah Ad-Dhuha di IlmuAlam.com – bacaan Arab, rumi, terjemahan & audio.';
 
-// Expose controls globally for inline event handlers
-  window.toggleDisplay = toggleDisplay;
-  window.toggleAudio = toggleAudio;
-  window.toggleProgress = toggleProgress;
-  window.toggleBookmark = toggleBookmark;
-  window.toggleDarkMode = toggleDarkMode;
-  window.resetProgress = resetProgress;
-  window.seekAudio = seekAudio;
-  window.playVerse = playVerse;
-  window.shareToWhatsApp = shareToWhatsApp;
-  window.shareToTelegram = shareToTelegram;
-  window.copyLink = copyLink;
+if (type === 'whatsapp') {
+window.open('https://wa.me/?text=' + encodeURIComponent(text + ' ' + url), '_blank');
+} else if (type === 'telegram') {
+window.open('https://t.me/share/url?url=' + encodeURIComponent(url) + '&text=' + encodeURIComponent(text), '_blank');
+} else if (type === 'copy') {
+if (navigator.clipboard && navigator.clipboard.writeText) {
+navigator.clipboard.writeText(url).catch(function () {});
+} else {
+const dummy = document.createElement('input');
+dummy.value = url;
+document.body.appendChild(dummy);
+dummy.select();
+try { document.execCommand('copy'); } catch (e) {}
+document.body.removeChild(dummy);
+}
+}
+});
+}
 
-  // =========================
-  //  BOOTSTRAP
-  // =========================
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initSurahTool);
-  } else {
-    initSurahTool();
-  }
+// ====== AUDIO HOOKS (Quran Cloud) ======
+if (audio) {
+audio.addEventListener('error', function () {
+if (timeDisplay) timeDisplay.textContent = 'Audio gagal dimuat';
+if (playToggle) playToggle.disabled = true;
+console.warn('Ralat audio Surah Ad-Dhuha:', audio.error);
+});
+
+audio.addEventListener('play', function () {
+if (playToggle) playToggle.textContent = '⏸';
+});
+
+audio.addEventListener('pause', function () {
+if (playToggle) playToggle.textContent = '▶';
+});
+
+audio.addEventListener('timeupdate', updateTimeAndProgress);
+audio.addEventListener('loadedmetadata', updateTimeAndProgress);
+
+if (playToggle) {
+playToggle.addEventListener('click', function () {
+if (!audio.src) return;
+
+// Kalau belum ada ayat playing, start dari ayat 1
+if (currentAyahIndex === -1 && versesContainer) {
+currentAyahIndex = 0;
+const firstCard = versesContainer.querySelector('.verse-card[data-ayah="1"]');
+if (firstCard) setPlayingCard(firstCard, true);
+}
+
+if (audio.paused) {
+audio.play().catch(function () {});
+} else {
+audio.pause();
+}
+});
+}
+
+if (progressBar) {
+progressBar.addEventListener('click', function (e) {
+if (!audio.duration) return;
+const rect = progressBar.getBoundingClientRect();
+const clickX = e.clientX - rect.left;
+const ratio = Math.min(Math.max(clickX / rect.width, 0), 1);
+audio.currentTime = audio.duration * ratio;
+updateTimeAndProgress();
+});
+}
+} else {
+if (playToggle) playToggle.disabled = true;
+}
+
+// ====== INIT ======
+buildVerses();
+applyMode('all');
+updateTimeAndProgress();
+
 })();
