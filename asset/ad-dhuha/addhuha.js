@@ -1,381 +1,559 @@
-/**
-* Surah Ad-Dhuha Interactive Tool
-* Copyright © 2025 ilmualam.com
-*
-* This code is proprietary and confidential.
-* Unauthorized copying, distribution, or modification is strictly prohibited.
-* Licensed exclusively for use on ilmualam.com
-*
-* @author ilmualam.com
-* @version 2.1.0
-* @license Proprietary
-*/
-// =====================
-// TOOL SURAH AD-DHUHA – AUDIO QURAN CLOUD + AUTO HIGHLIGHT/SCROLL
-// =====================
-
+// ### addduha.js – Tool Interaktif Surah Ad-Dhuha (IlmuAlam) ###
+// - Ambil teks & audio dari api.alquran.cloud (verse-by-verse Alafasy)
+// - Auto-scroll & highlight ayat semasa
+// - Progress hafazan + bookmark + dark mode + view mode + share
 (function () {
-const root = document.getElementById('surah-ad-dhuha-tool');
-if (!root) return;
+  'use strict';
 
-const versesContainer = root.querySelector('#verses-container');
-const playToggle = root.querySelector('#play-toggle');
-const progressBar = root.querySelector('#audio-progress');
-const progressFill = root.querySelector('#audio-progress-fill');
-const timeDisplay = root.querySelector('#time-display');
-const statAyah = root.querySelector('#stat-ayah-count');
-const statProgress = root.querySelector('#stat-progress');
-const statBookmarks = root.querySelector('#stat-bookmarks');
-const controlsPanel = root.querySelector('.controls-panel');
-const shareButtons = root.querySelector('.share-buttons');
-const audio = root.querySelector('#surah-ad-dhuha-audio'); // <audio> Quran Cloud
+  const API_URL =
+    'https://api.alquran.cloud/v1/surah/93/editions/quran-uthmani,ms.basmeih,en.transliteration,ar.alafasy';
 
-// ====== DATA SURAH (11 AYAT) ======
-const SURAH_AD_DHUHA = [
-{ ayah: 1, arabic: 'وَالضُّحَىٰ', rumi: 'Wad-dhuha', translation: 'Demi waktu Dhuha (pagi yang cerah),' },
-{ ayah: 2, arabic: 'وَاللَّيْلِ إِذَا سَجَىٰ', rumi: 'Wal-layli idza saja', translation: 'Dan demi malam apabila ia menjadi sunyi,' },
-{ ayah: 3, arabic: 'مَا وَدَّعَكَ رَبُّكَ وَمَا قَلَىٰ', rumi: 'Ma wadda‘aka rabbuka wa ma qala', translation: 'Tuhanmu (wahai Muhammad) tidak meninggalkan engkau dan tidak membenci engkau.' },
-{ ayah: 4, arabic: 'وَلَلْآخِرَةُ خَيْرٌ لَّكَ مِنَ الْأُولَىٰ', rumi: 'Walal-ākhiratu khayrul laka minal-ūlā', translation: 'Dan sesungguhnya hari kemudian (akhirat) adalah lebih baik bagimu daripada permulaan (dunia).' },
-{ ayah: 5, arabic: 'وَلَسَوْفَ يُعْطِيكَ رَبُّكَ فَتَرْضَىٰ', rumi: 'Wa lasawfa yu‘țīka rabbuka fa tarḍā', translation: 'Dan kelak Tuhanmu pasti memberikan kepadamu (segala nikmat), lalu engkau menjadi reda.' },
-{ ayah: 6, arabic: 'أَلَمْ يَجِدْكَ يَتِيمًا فَآوَىٰ', rumi: 'Alam yajidka yatīman fa-āwā', translation: 'Bukankah Dia mendapatimu sebagai anak yatim, lalu Dia memberi perlindungan?' },
-{ ayah: 7, arabic: 'وَوَجَدَكَ ضَالًّا فَهَدَىٰ', rumi: 'Wa wajadaka ḍāllan fahadā', translation: 'Dan Dia mendapatimu dalam keadaan tidak mengetahui (jalan yang lengkap), lalu Dia memberi petunjuk?' },
-{ ayah: 8, arabic: 'وَوَجَدَكَ عَائِلًا فَأَغْنَىٰ', rumi: 'Wa wajadaka ‘āilan fa-aghna', translation: 'Dan Dia mendapatimu dalam keadaan miskin, lalu Dia memberikan kecukupan?' },
-{ ayah: 9, arabic: 'فَأَمَّا الْيَتِيمَ فَلَا تَقْهَرْ', rumi: 'Fa ammāl-yatīma falā taqhar', translation: 'Maka terhadap anak yatim, janganlah kamu berlaku sewenang-wenangnya.' },
-{ ayah: 10, arabic: 'وَأَمَّا السَّائِلَ فَلَا تَنْهَرْ', rumi: 'Wa ammās-sā-ila falā tanhar', translation: 'Dan terhadap orang yang meminta-minta, janganlah kamu menghardiknya.' },
-{ ayah: 11, arabic: 'وَأَمَّا بِنِعْمَةِ رَبِّكَ فَحَدِّثْ', rumi: 'Wa ammā bini‘mati rabbika faḥaddith', translation: 'Dan terhadap nikmat Tuhanmu, maka hendaklah kamu sebar-sebarkan (dengan bersyukur).' }
-];
+  const LS_KEYS = {
+    mode: 'ilmu_ad_dhuha_mode',
+    dark: 'ilmu_ad_dhuha_dark',
+    progress: 'ilmu_ad_dhuha_progress',
+    bookmarks: 'ilmu_ad_dhuha_bookmarks'
+  };
 
-const STORAGE_KEY = 'ilmu_ad_dhuha_state_v1';
+  function init() {
+    const root = document.getElementById('surah-ad-dhuha-tool');
+    if (!root) return;
 
-function loadState() {
-try {
-const raw = localStorage.getItem(STORAGE_KEY);
-if (!raw) return { completed: [], bookmarks: [] };
-const parsed = JSON.parse(raw);
-return {
-completed: Array.isArray(parsed.completed) ? parsed.completed : [],
-bookmarks: Array.isArray(parsed.bookmarks) ? parsed.bookmarks : [],
-};
-} catch (e) {
-return { completed: [], bookmarks: [] };
-}
-}
+    const versesContainer = root.querySelector('#verses-container');
+    const playToggle = root.querySelector('#play-toggle');
+    const progressBar = root.querySelector('#audio-progress');
+    const progressFill = root.querySelector('#audio-progress-fill');
+    const timeDisplay = root.querySelector('#time-display');
+    const statProgress = root.querySelector('#stat-progress');
+    const statBookmarks = root.querySelector('#stat-bookmarks');
+    const controlButtons = root.querySelectorAll('.control-btn');
+    const shareButtons = root.querySelectorAll('.share-btn');
 
-function saveState(state) {
-try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {}
-}
+    const state = {
+      verses: [],
+      audios: [],
+      currentIndex: 0,
+      playing: false,
+      mode: 'all',
+      dark: false,
+      completed: new Set(),
+      bookmarks: new Set(),
+      audioTimer: null
+    };
 
-let state = loadState();
-let currentAyahIndex = -1; // index dalam array (0–10)
+    // === Helpers: localStorage ===
+    function safeGet(key) {
+      try {
+        return window.localStorage ? window.localStorage.getItem(key) : null;
+      } catch (e) {
+        return null;
+      }
+    }
 
-// ====== BUILD VERSES ======
-function buildVerses() {
-if (!versesContainer) return;
+    function safeSet(key, value) {
+      try {
+        if (window.localStorage) {
+          window.localStorage.setItem(key, value);
+        }
+      } catch (e) {
+        // ignore
+      }
+    }
 
-const completedSet = new Set(state.completed || []);
-const bookmarkSet = new Set(state.bookmarks || []);
-let html = '';
+    // === Load saved prefs (mode / dark / progress / bookmarks) ===
+    (function loadSaved() {
+      const savedMode = safeGet(LS_KEYS.mode);
+      if (savedMode) state.mode = savedMode;
 
-SURAH_AD_DHUHA.forEach(v => {
-const isCompleted = completedSet.has(v.ayah);
-const isBookmarked = bookmarkSet.has(v.ayah);
+      const savedDark = safeGet(LS_KEYS.dark);
+      if (savedDark === '1') {
+        state.dark = true;
+        root.classList.add('dark-mode');
+      }
 
-html += `
-<article class="verse-card" data-ayah="${v.ayah}">
-<header class="verse-header">
-<div class="verse-number">${v.ayah}</div>
-<div class="verse-actions">
-<button type="button" class="action-icon action-play" aria-label="Mainkan ayat ${v.ayah}">▶</button>
-<button type="button" class="action-icon action-complete ${isCompleted ? 'active' : ''}" aria-label="Tanda ayat ${v.ayah} telah dikuasai">✓</button>
-<button type="button" class="action-icon action-bookmark ${isBookmarked ? 'active' : ''}" aria-label="Tanda ayat ${v.ayah} sebagai kegemaran">★</button>
-</div>
-</header>
-<p class="verse-arabic">${v.arabic}</p>
-<p class="verse-rumi">${v.rumi}</p>
-<p class="verse-translation">${v.translation}</p>
-</article>
-`;
-});
+      const savedProgress = safeGet(LS_KEYS.progress);
+      if (savedProgress) {
+        savedProgress.split(',').forEach((n) => {
+          const num = parseInt(n, 10);
+          if (!isNaN(num)) state.completed.add(num);
+        });
+      }
 
-versesContainer.innerHTML = html;
-if (statAyah) statAyah.textContent = String(SURAH_AD_DHUHA.length);
-updateStats();
-}
+      const savedBookmarks = safeGet(LS_KEYS.bookmarks);
+      if (savedBookmarks) {
+        savedBookmarks.split(',').forEach((n) => {
+          const num = parseInt(n, 10);
+          if (!isNaN(num)) state.bookmarks.add(num);
+        });
+      }
+    })();
 
-// ====== AUDIO UTILITY ======
-function formatTime(sec) {
-if (!isFinite(sec)) return '00:00';
-const m = Math.floor(sec / 60);
-const s = Math.floor(sec % 60);
-return String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
-}
+    // === Fetch data dari API ===
+    fetch(API_URL)
+      .then((res) => res.json())
+      .then((json) => {
+        if (!json || json.code !== 200 || !json.data || !Array.isArray(json.data)) {
+          throw new Error('Response tidak seperti dijangka');
+        }
+        buildFromApi(json.data);
+      })
+      .catch((err) => {
+        console.error('Ad-Dhuha tool error:', err);
+        if (versesContainer) {
+          versesContainer.innerHTML =
+            '<p style="padding:12px 8px;color:#b91c1c;background:#fee2e2;border-radius:8px;">Maaf, tool Surah Ad-Dhuha sedang mengalami masalah teknikal. Sila cuba refresh halaman atau cuba lagi kemudian.</p>';
+        }
+      });
 
-function updateTimeAndProgress() {
-if (!audio || !progressFill || !timeDisplay) return;
-const current = audio.currentTime || 0;
-const duration = audio.duration || 0;
-const percent = duration ? (current / duration) * 100 : 0;
-progressFill.style.width = percent + '%';
-timeDisplay.textContent = formatTime(current) + ' / ' + formatTime(duration);
+    // === Bina verses dari API multiple editions ===
+    function buildFromApi(dataArr) {
+      const editions = {};
+      dataArr.forEach((entry) => {
+        if (entry && entry.edition && entry.edition.identifier) {
+          editions[entry.edition.identifier] = entry;
+        }
+      });
 
-// ====== AUTO AYAT (ANGGARAN BERDASARKAN % AUDIO) ======
-if (duration && versesContainer) {
-let idx = Math.floor((current / duration) * SURAH_AD_DHUHA.length);
-if (idx < 0) idx = 0;
-if (idx >= SURAH_AD_DHUHA.length) idx = SURAH_AD_DHUHA.length - 1;
+      const ar = editions['quran-uthmani'];
+      const ms = editions['ms.basmeih'];
+      const rumi = editions['en.transliteration'];
+      const audioEd = editions['ar.alafasy'];
 
-if (idx !== currentAyahIndex) {
-currentAyahIndex = idx;
-const card = versesContainer.querySelector('.verse-card[data-ayah="' + (idx + 1) + '"]');
-if (card) {
-setPlayingCard(card, true); // true = scroll
-}
-}
-}
-}
+      if (!ar || !ms || !rumi || !audioEd) {
+        throw new Error('Edition quran-uthmani/ms.basmeih/en.transliteration/ar.alafasy tidak lengkap');
+      }
 
-// ====== STATS ======
-function updateStats() {
-const total = SURAH_AD_DHUHA.length;
-const completed = (state.completed || []).length;
-const bookmarks = (state.bookmarks || []).length;
+      const total =
+        (ar.numberOfAyahs && Number(ar.numberOfAyahs)) ||
+        (Array.isArray(ar.ayahs) ? ar.ayahs.length : 0);
 
-if (statProgress) {
-const pct = total ? Math.round((completed / total) * 100) : 0;
-statProgress.textContent = pct + '%';
-}
-if (statBookmarks) {
-statBookmarks.textContent = String(bookmarks);
-}
-}
+      if (!total || !Array.isArray(ar.ayahs)) {
+        throw new Error('Data ayat tidak sah');
+      }
 
-function setPlayingCard(card, doScroll) {
-if (!versesContainer) return;
-const cards = versesContainer.querySelectorAll('.verse-card');
-cards.forEach(c => c.classList.remove('playing'));
-if (card) {
-card.classList.add('playing');
-if (doScroll) {
-card.scrollIntoView({
-behavior: 'smooth',
-block: 'center'
-});
-}
-}
-}
+      const verses = [];
+      const audios = [];
 
-// ====== VERSE INTERACTION ======
-if (versesContainer) {
-versesContainer.addEventListener('click', function (e) {
-const target = e.target;
-const card = target.closest('.verse-card');
-if (!card) return;
-const ayah = Number(card.getAttribute('data-ayah'));
-if (!ayah) return;
-const verseIdx = ayah - 1;
+      for (let i = 0; i < total; i++) {
+        const v = {
+          index: i,
+          number: i + 1,
+          arabic: (ar.ayahs[i] && ar.ayahs[i].text) || '',
+          rumi: (rumi.ayahs[i] && rumi.ayahs[i].text) || '',
+          translation: (ms.ayahs[i] && ms.ayahs[i].text) || '',
+          audioUrl: (audioEd.ayahs[i] && audioEd.ayahs[i].audio) || ''
+        };
 
-// Klik icon PLAY pada ayat
-if (target.closest('.action-play')) {
-currentAyahIndex = verseIdx;
-setPlayingCard(card, true);
+        verses.push(v);
 
-if (audio) {
-// anggaran posisi audio ikut nisbah ayat
-if (audio.duration && isFinite(audio.duration)) {
-audio.currentTime = (verseIdx / SURAH_AD_DHUHA.length) * audio.duration;
-} else {
-audio.currentTime = 0;
-}
-audio.play().catch(function () {});
-}
-return;
-}
+        const audio = new Audio(v.audioUrl);
+        audio.preload = 'none';
+        audio.addEventListener('ended', () => handleAudioEnded(i));
+        audios.push(audio);
+      }
 
-// Klik icon COMPLETE
-if (target.closest('.action-complete')) {
-const idx = state.completed.indexOf(ayah);
-const btn = target.closest('.action-complete');
-if (idx === -1) {
-state.completed.push(ayah);
-btn.classList.add('active');
-} else {
-state.completed.splice(idx, 1);
-btn.classList.remove('active');
-}
-saveState(state);
-updateStats();
-return;
-}
+      state.verses = verses;
+      state.audios = audios;
 
-// Klik icon BOOKMARK
-if (target.closest('.action-bookmark')) {
-const idxB = state.bookmarks.indexOf(ayah);
-const btn = target.closest('.action-bookmark');
-if (idxB === -1) {
-state.bookmarks.push(ayah);
-btn.classList.add('active');
-} else {
-state.bookmarks.splice(idxB, 1);
-btn.classList.remove('active');
-}
-saveState(state);
-updateStats();
-return;
-}
+      renderVerses();
+      applyMode(state.mode);
+      updateStats();
+      wireControls();
+    }
 
-// Klik mana-mana lokasi lain pada kad ayat → hanya highlight + scroll
-if (!target.closest('.action-icon')) {
-currentAyahIndex = verseIdx;
-setPlayingCard(card, true);
-}
-});
-}
+    // === Render verse cards ===
+    function renderVerses() {
+      if (!versesContainer) return;
+      versesContainer.innerHTML = '';
 
-// ====== MODE PAPARAN (Arab / Rumi / Terjemahan / Tadabbur) ======
-function applyMode(mode) {
-if (!versesContainer) return;
-const cards = versesContainer.querySelectorAll('.verse-card');
+      state.verses.forEach((v) => {
+        const card = document.createElement('article');
+        card.className = 'verse-card';
+        card.dataset.index = String(v.index);
 
-cards.forEach(card => {
-const arabic = card.querySelector('.verse-arabic');
-const rumi = card.querySelector('.verse-rumi');
-const translation = card.querySelector('.verse-translation');
-if (!arabic || !rumi || !translation) return;
+        const header = document.createElement('div');
+        header.className = 'verse-header';
 
-let showArabic = true;
-let showRumi = true;
-let showTranslation = true;
+        const num = document.createElement('div');
+        num.className = 'verse-number';
+        num.textContent = String(v.number);
 
-if (mode === 'arabic') {
-showArabic = true; showRumi = false; showTranslation = false;
-} else if (mode === 'rumi') {
-showArabic = false; showRumi = true; showTranslation = false;
-} else if (mode === 'translation') {
-showArabic = false; showRumi = false; showTranslation = true;
-} else if (mode === 'tadabbur') {
-showArabic = true; showRumi = false; showTranslation = true;
-}
+        const actions = document.createElement('div');
+        actions.className = 'verse-actions';
 
-arabic.style.display = showArabic ? 'block' : 'none';
-rumi.style.display = showRumi ? 'block' : 'none';
-translation.style.display = showTranslation ? 'block' : 'none';
-});
-}
+        // Complete (progress) button
+        const completeBtn = document.createElement('button');
+        completeBtn.type = 'button';
+        completeBtn.className = 'action-icon action-complete';
+        completeBtn.setAttribute('aria-label', 'Tanda ayat ' + v.number + ' selesai');
+        completeBtn.innerHTML = '✓';
+        if (state.completed.has(v.number)) completeBtn.classList.add('active');
+        completeBtn.addEventListener('click', function (e) {
+          e.stopPropagation();
+          toggleCompleted(v.number, completeBtn);
+        });
 
-if (controlsPanel) {
-controlsPanel.addEventListener('click', function (e) {
-const btn = e.target.closest('.control-btn');
-if (!btn) return;
+        // Bookmark button
+        const bookmarkBtn = document.createElement('button');
+        bookmarkBtn.type = 'button';
+        bookmarkBtn.className = 'action-icon action-bookmark';
+        bookmarkBtn.setAttribute('aria-label', 'Tanda ayat ' + v.number + ' sebagai kegemaran');
+        bookmarkBtn.innerHTML = '★';
+        if (state.bookmarks.has(v.number)) bookmarkBtn.classList.add('active');
+        bookmarkBtn.addEventListener('click', function (e) {
+          e.stopPropagation();
+          toggleBookmark(v.number, bookmarkBtn);
+        });
 
-const mode = btn.getAttribute('data-mode');
-const allBtns = controlsPanel.querySelectorAll('.control-btn');
-allBtns.forEach(b => b.classList.remove('active'));
-btn.classList.add('active');
+        actions.appendChild(completeBtn);
+        actions.appendChild(bookmarkBtn);
 
-if (mode === 'all') applyMode('all');
-else if (mode === 'arabic') applyMode('arabic');
-else if (mode === 'rumi') applyMode('rumi');
-else if (mode === 'translation') applyMode('translation');
-else if (mode === 'tadabbur') applyMode('tadabbur');
-});
+        header.appendChild(num);
+        header.appendChild(actions);
 
-const firstBtn = controlsPanel.querySelector('.control-btn[data-mode="all"]');
-if (firstBtn) firstBtn.classList.add('active');
-}
+        const arabicEl = document.createElement('div');
+        arabicEl.className = 'verse-arabic';
+        arabicEl.textContent = v.arabic;
 
-// ====== DARK MODE ======
-if (controlsPanel) {
-const darkBtn = controlsPanel.querySelector('[data-toggle="dark"]');
-if (darkBtn) {
-darkBtn.addEventListener('click', function () {
-root.classList.toggle('dark-mode');
-});
-}
-}
+        const rumiEl = document.createElement('div');
+        rumiEl.className = 'verse-rumi';
+        rumiEl.textContent = v.rumi;
 
-// ====== SHARE BUTTONS ======
-if (shareButtons) {
-shareButtons.addEventListener('click', function (e) {
-const btn = e.target.closest('.share-btn');
-if (!btn) return;
-const type = btn.getAttribute('data-share');
-const url = window.location.href.split('#')[0] + '#surah-ad-dhuha-tool';
-const text = 'Tool Interaktif Surah Ad-Dhuha di IlmuAlam.com – bacaan Arab, rumi, terjemahan & audio.';
+        const transEl = document.createElement('div');
+        transEl.className = 'verse-translation';
+        transEl.textContent = v.translation;
 
-if (type === 'whatsapp') {
-window.open('https://wa.me/?text=' + encodeURIComponent(text + ' ' + url), '_blank');
-} else if (type === 'telegram') {
-window.open('https://t.me/share/url?url=' + encodeURIComponent(url) + '&text=' + encodeURIComponent(text), '_blank');
-} else if (type === 'copy') {
-if (navigator.clipboard && navigator.clipboard.writeText) {
-navigator.clipboard.writeText(url).catch(function () {});
-} else {
-const dummy = document.createElement('input');
-dummy.value = url;
-document.body.appendChild(dummy);
-dummy.select();
-try { document.execCommand('copy'); } catch (e) {}
-document.body.removeChild(dummy);
-}
-}
-});
-}
+        card.appendChild(header);
+        card.appendChild(arabicEl);
+        card.appendChild(rumiEl);
+        card.appendChild(transEl);
 
-// ====== AUDIO HOOKS (Quran Cloud) ======
-if (audio) {
-audio.addEventListener('error', function () {
-if (timeDisplay) timeDisplay.textContent = 'Audio gagal dimuat';
-if (playToggle) playToggle.disabled = true;
-console.warn('Ralat audio Surah Ad-Dhuha:', audio.error);
-});
+        // Klik pada kad ayat
+        card.addEventListener('click', function () {
+          state.currentIndex = v.index;
+          highlightCurrent();
+          scrollToCurrent();
+          if (state.playing) {
+            playFromCurrent(true); // tukar audio ke ayat yang diklik
+          }
+        });
 
-audio.addEventListener('play', function () {
-if (playToggle) playToggle.textContent = '⏸';
-});
+        versesContainer.appendChild(card);
+      });
+    }
 
-audio.addEventListener('pause', function () {
-if (playToggle) playToggle.textContent = '▶';
-});
+    // === Audio control ===
+    function pauseAllAudios() {
+      state.audios.forEach((a) => {
+        try {
+          a.pause();
+        } catch (e) {}
+      });
+    }
 
-audio.addEventListener('timeupdate', updateTimeAndProgress);
-audio.addEventListener('loadedmetadata', updateTimeAndProgress);
+    function resetOtherAudios(current) {
+      state.audios.forEach((a) => {
+        if (a !== current) {
+          try {
+            a.currentTime = 0;
+          } catch (e) {}
+        }
+      });
+    }
 
-if (playToggle) {
-playToggle.addEventListener('click', function () {
-if (!audio.src) return;
+    function playFromCurrent(resetTime) {
+      const audio = state.audios[state.currentIndex];
+      if (!audio) return;
 
-// Kalau belum ada ayat playing, start dari ayat 1
-if (currentAyahIndex === -1 && versesContainer) {
-currentAyahIndex = 0;
-const firstCard = versesContainer.querySelector('.verse-card[data-ayah="1"]');
-if (firstCard) setPlayingCard(firstCard, true);
-}
+      pauseAllAudios();
+      resetOtherAudios(audio);
 
-if (audio.paused) {
-audio.play().catch(function () {});
-} else {
-audio.pause();
-}
-});
-}
+      if (resetTime) {
+        try {
+          audio.currentTime = 0;
+        } catch (e) {}
+      }
 
-if (progressBar) {
-progressBar.addEventListener('click', function (e) {
-if (!audio.duration) return;
-const rect = progressBar.getBoundingClientRect();
-const clickX = e.clientX - rect.left;
-const ratio = Math.min(Math.max(clickX / rect.width, 0), 1);
-audio.currentTime = audio.duration * ratio;
-updateTimeAndProgress();
-});
-}
-} else {
-if (playToggle) playToggle.disabled = true;
-}
+      audio
+        .play()
+        .then(() => {
+          state.playing = true;
+          if (playToggle) playToggle.textContent = '⏸';
+          highlightCurrent();
+          scrollToCurrent();
+          startProgressTimer();
+        })
+        .catch((err) => {
+          console.error('Play error:', err);
+        });
+    }
 
-// ====== INIT ======
-buildVerses();
-applyMode('all');
-updateTimeAndProgress();
+    function handleAudioEnded(index) {
+      if (!state.playing) return;
 
+      // Auto ke ayat seterusnya
+      if (index < state.verses.length - 1) {
+        state.currentIndex = index + 1;
+        playFromCurrent(true); // auto-scroll akan dipanggil dalam ni
+      } else {
+        // Habis surah
+        state.playing = false;
+        if (playToggle) playToggle.textContent = '▶';
+        stopProgressTimer();
+      }
+    }
+
+    function startProgressTimer() {
+      stopProgressTimer();
+      const audio = state.audios[state.currentIndex];
+      if (!audio) return;
+
+      state.audioTimer = window.setInterval(function () {
+        if (!audio.duration || isNaN(audio.duration)) return;
+        const pct = (audio.currentTime / audio.duration) * 100;
+        if (progressFill) progressFill.style.width = pct + '%';
+
+        if (timeDisplay) {
+          timeDisplay.textContent =
+            formatTime(audio.currentTime) + ' / ' + formatTime(audio.duration);
+        }
+      }, 200);
+    }
+
+    function stopProgressTimer() {
+      if (state.audioTimer) {
+        window.clearInterval(state.audioTimer);
+        state.audioTimer = null;
+      }
+    }
+
+    function formatTime(sec) {
+      const s = Math.floor(sec || 0);
+      const m = Math.floor(s / 60);
+      const r = s % 60;
+      return String(m).padStart(2, '0') + ':' + String(r).padStart(2, '0');
+    }
+
+    // === Highlight & auto scroll ===
+    function highlightCurrent() {
+      if (!versesContainer) return;
+      const cards = versesContainer.querySelectorAll('.verse-card');
+      cards.forEach((c) => c.classList.remove('playing'));
+      const current = cards[state.currentIndex];
+      if (current) current.classList.add('playing');
+    }
+
+    function scrollToCurrent() {
+      if (!versesContainer) return;
+      const current = versesContainer.querySelector('.verse-card.playing');
+      if (current && current.scrollIntoView) {
+        current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+
+    // === Progress + Bookmark ===
+    function toggleCompleted(num, btn) {
+      if (state.completed.has(num)) {
+        state.completed.delete(num);
+        if (btn) btn.classList.remove('active');
+      } else {
+        state.completed.add(num);
+        if (btn) btn.classList.add('active');
+      }
+      safeSet(LS_KEYS.progress, Array.from(state.completed).join(','));
+      updateStats();
+    }
+
+    function toggleBookmark(num, btn) {
+      if (state.bookmarks.has(num)) {
+        state.bookmarks.delete(num);
+        if (btn) btn.classList.remove('active');
+      } else {
+        state.bookmarks.add(num);
+        if (btn) btn.classList.add('active');
+      }
+      safeSet(LS_KEYS.bookmarks, Array.from(state.bookmarks).join(','));
+      updateStats();
+    }
+
+    function updateStats() {
+      const total = state.verses.length || 11;
+      const pct = total ? Math.round((state.completed.size / total) * 100) : 0;
+      if (statProgress) statProgress.textContent = pct + '%';
+      if (statBookmarks) statBookmarks.textContent = String(state.bookmarks.size);
+    }
+
+    // === Mode view (Arab / Rumi / Terjemahan / Tadabbur) ===
+    function applyMode(mode) {
+      state.mode = mode || 'all';
+      safeSet(LS_KEYS.mode, state.mode);
+
+      controlButtons.forEach((btn) => {
+        const m = btn.getAttribute('data-mode');
+        if (m) {
+          if (m === state.mode) btn.classList.add('active');
+          else btn.classList.remove('active');
+        }
+      });
+
+      if (!versesContainer) return;
+      const cards = versesContainer.querySelectorAll('.verse-card');
+
+      cards.forEach((card) => {
+        const ar = card.querySelector('.verse-arabic');
+        const rumi = card.querySelector('.verse-rumi');
+        const trans = card.querySelector('.verse-translation');
+        if (!ar || !rumi || !trans) return;
+
+        switch (state.mode) {
+          case 'arabic':
+            ar.style.display = '';
+            rumi.style.display = 'none';
+            trans.style.display = 'none';
+            break;
+          case 'rumi':
+            ar.style.display = 'none';
+            rumi.style.display = '';
+            trans.style.display = 'none';
+            break;
+          case 'translation':
+            ar.style.display = 'none';
+            rumi.style.display = 'none';
+            trans.style.display = '';
+            break;
+          case 'tadabbur':
+            ar.style.display = '';
+            rumi.style.display = 'none';
+            trans.style.display = '';
+            break;
+          case 'all':
+          default:
+            ar.style.display = '';
+            rumi.style.display = '';
+            trans.style.display = '';
+            break;
+        }
+      });
+    }
+
+    // === Dark mode ===
+    function toggleDarkMode() {
+      state.dark = !state.dark;
+      if (state.dark) root.classList.add('dark-mode');
+      else root.classList.remove('dark-mode');
+      safeSet(LS_KEYS.dark, state.dark ? '1' : '0');
+    }
+
+    // === Share buttons ===
+    function handleShare(type) {
+      const url =
+        window.location.origin + window.location.pathname + '#surah-ad-dhuha-tool';
+      const text =
+        'Tool Surah Ad-Dhuha Rumi, Terjemahan & Audio di IlmuAlam.com\n' + url;
+
+      if (type === 'copy') {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard
+            .writeText(url)
+            .then(() => {
+              alert('Link tool telah disalin.');
+            })
+            .catch(() => {
+              alert('Gagal salin link. Sila cuba manual.');
+            });
+        } else {
+          alert('Clipboard tidak disokong, sila copy url secara manual.');
+        }
+        return;
+      }
+
+      const encodedText = encodeURIComponent(text);
+      const encodedUrl = encodeURIComponent(url);
+
+      if (type === 'whatsapp') {
+        window.open('https://wa.me/?text=' + encodedText, '_blank');
+      } else if (type === 'telegram') {
+        window.open(
+          'https://t.me/share/url?url=' + encodedUrl + '&text=' + encodedText,
+          '_blank'
+        );
+      }
+    }
+
+    // === Wire event handlers (once verses dah render) ===
+    function wireControls() {
+      // Play / Pause
+      if (playToggle) {
+        playToggle.addEventListener('click', function () {
+          if (!state.verses.length) return;
+          if (!state.playing) {
+            if (
+              state.currentIndex < 0 ||
+              state.currentIndex >= state.verses.length
+            ) {
+              state.currentIndex = 0;
+            }
+            playFromCurrent(false);
+          } else {
+            pauseAllAudios();
+            state.playing = false;
+            if (playToggle) playToggle.textContent = '▶';
+            stopProgressTimer();
+          }
+        });
+      }
+
+      // Progress bar seek (dalam ayat semasa sahaja)
+      if (progressBar) {
+        progressBar.addEventListener('click', function (e) {
+          const audio = state.audios[state.currentIndex];
+          if (!audio || !audio.duration) return;
+
+          const rect = progressBar.getBoundingClientRect();
+          const ratio = (e.clientX - rect.left) / rect.width;
+          const clamped = Math.min(Math.max(ratio, 0), 1);
+          try {
+            audio.currentTime = audio.duration * clamped;
+          } catch (err) {
+            console.error('Seek error:', err);
+          }
+        });
+      }
+
+      // Mode buttons + dark mode toggle
+      controlButtons.forEach((btn) => {
+        const mode = btn.getAttribute('data-mode');
+        const toggle = btn.getAttribute('data-toggle');
+
+        if (mode) {
+          btn.addEventListener('click', function () {
+            applyMode(mode);
+          });
+        } else if (toggle === 'dark') {
+          btn.addEventListener('click', function () {
+            toggleDarkMode();
+          });
+        }
+      });
+
+      // Share
+      shareButtons.forEach((btn) => {
+        btn.addEventListener('click', function () {
+          const type = btn.getAttribute('data-share');
+          if (!type) return;
+          handleShare(type);
+        });
+      });
+
+      // Apply initial mode & stats once more (in case)
+      applyMode(state.mode);
+      updateStats();
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
 })();
